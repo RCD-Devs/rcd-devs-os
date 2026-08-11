@@ -20,3 +20,13 @@ export function calcularEstadoEjecucion(
 
   return pasos.every((paso) => esEstadoTerminal(paso.estado)) ? "Completo" : "En curso";
 }
+
+export function contarProgreso(pasos: Array<{ estado: string }>): {
+  completos: number;
+  total: number;
+} {
+  return {
+    completos: pasos.filter((paso) => esEstadoTerminal(paso.estado)).length,
+    total: pasos.length,
+  };
+}

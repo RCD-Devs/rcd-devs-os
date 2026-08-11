@@ -5,6 +5,8 @@ import { EtapaSelector } from "./EtapaSelector";
 import { IniciarProtocoloButton } from "./IniciarProtocoloButton";
 import { Card } from "@/components/ui/Card";
 import { EstadoBadge } from "@/components/ui/Badge";
+import { ProgressBar } from "@/components/ui/ProgressBar";
+import { contarProgreso } from "@/lib/protocolos/estados";
 
 export default async function ProyectoPage({
   params,
@@ -19,7 +21,7 @@ export default async function ProyectoPage({
       cliente: true,
       etapaActual: true,
       ejecucionesProtocolo: {
-        include: { versionProtocolo: { include: { protocolo: true } } },
+        include: { versionProtocolo: { include: { protocolo: true } }, pasos: true },
       },
     },
   });
@@ -55,15 +57,17 @@ export default async function ProyectoPage({
           );
           const ejecucion =
             ejecuciones.find((e) => e.estado !== "Completo") ?? ejecuciones[0];
+          const progreso = ejecucion ? contarProgreso(ejecucion.pasos) : null;
 
           return (
             <li key={protocolo.id}>
               <Card className="flex items-center justify-between">
                 <div>
                   <p className="font-medium">{protocolo.nombre}</p>
-                  {ejecucion && (
-                    <div className="mt-1">
+                  {ejecucion && progreso && (
+                    <div className="mt-1 flex items-center gap-3">
                       <EstadoBadge estado={ejecucion.estado} />
+                      <ProgressBar value={progreso.completos} max={progreso.total} />
                     </div>
                   )}
                 </div>

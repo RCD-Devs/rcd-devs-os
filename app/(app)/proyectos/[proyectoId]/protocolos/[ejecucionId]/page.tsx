@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { EjecucionPasoRow } from "./EjecucionPasoRow";
 import { EstadoBadge } from "@/components/ui/Badge";
+import { ProgressBar } from "@/components/ui/ProgressBar";
+import { contarProgreso } from "@/lib/protocolos/estados";
 
 export default async function ChecklistEjecucionPage({
   params,
@@ -14,7 +16,7 @@ export default async function ChecklistEjecucionPage({
     where: { id: ejecucionId },
     include: {
       versionProtocolo: { include: { protocolo: true } },
-      pasos: true,
+      pasos: { include: { responsable: true } },
     },
   });
 
@@ -23,12 +25,14 @@ export default async function ChecklistEjecucionPage({
   }
 
   const estadosValidos = ejecucion.versionProtocolo.estadosJson as unknown as string[];
+  const progreso = contarProgreso(ejecucion.pasos);
 
   return (
     <div>
       <h1 className="text-lg font-medium">{ejecucion.versionProtocolo.protocolo.nombre}</h1>
-      <div className="mt-2">
+      <div className="mt-2 flex items-center gap-3">
         <EstadoBadge estado={ejecucion.estado} />
+        <ProgressBar value={progreso.completos} max={progreso.total} />
       </div>
 
       <ul className="mt-6 space-y-3">

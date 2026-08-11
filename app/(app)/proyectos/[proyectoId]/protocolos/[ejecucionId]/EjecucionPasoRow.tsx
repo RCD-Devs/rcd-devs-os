@@ -16,6 +16,8 @@ export function EjecucionPasoRow({
     estado: string;
     notas: string | null;
     evidenciaUrl: string | null;
+    fechaEjecucion: Date | null;
+    responsable: { nombre: string | null; email: string } | null;
   };
   estadosValidos: string[];
 }) {
@@ -88,6 +90,13 @@ export function EjecucionPasoRow({
           onBlur={() => guardar({ notas })}
         />
       </div>
+
+      {paso.fechaEjecucion && (
+        <p className="mt-2 font-mono text-xs text-text-muted">
+          Marcado por {paso.responsable?.nombre ?? paso.responsable?.email ?? "?"} el{" "}
+          {new Date(paso.fechaEjecucion).toLocaleDateString("es-CL")}
+        </p>
+      )}
 
       {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
     </Card>

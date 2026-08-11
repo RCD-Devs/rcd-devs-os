@@ -13,7 +13,7 @@ export default async function ProtocolosPage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-lg font-medium">Protocolos</h1>
+      <h1 className="mb-6 text-2xl font-bold tracking-tight text-text">Protocolos</h1>
 
       <ul className="space-y-3">
         {protocolos.map((protocolo) => (

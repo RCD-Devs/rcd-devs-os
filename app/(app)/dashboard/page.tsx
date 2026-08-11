@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Building2, CircleCheckBig, FolderKanban, ListChecks } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth/getCurrentUser";
 import { prisma } from "@/lib/prisma";
 import { Card } from "@/components/ui/Card";
 import { ProgressBar } from "@/components/ui/ProgressBar";
+import { StatCard } from "@/components/ui/StatCard";
 import { contarProgreso } from "@/lib/protocolos/estados";
 
 // Ruta protegida por proxy.ts, depende de datos reales de Supabase: nunca
@@ -17,7 +19,7 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const [proyectos, protocolos] = await Promise.all([
+  const [proyectos, protocolos, clientesTotales] = await Promise.all([
     prisma.proyecto.findMany({
       include: {
         cliente: true,
@@ -28,11 +30,16 @@ export default async function DashboardPage() {
       orderBy: { nombre: "asc" },
     }),
     prisma.protocolo.findMany({ orderBy: { nombre: "asc" } }),
+    prisma.cliente.count(),
   ]);
+
+  const todasLasEjecuciones = proyectos.flatMap((p) => p.ejecucionesProtocolo);
+  const protocolosEnCurso = todasLasEjecuciones.filter((e) => e.estado !== "Completo").length;
+  const protocolosCompletos = todasLasEjecuciones.filter((e) => e.estado === "Completo").length;
 
   return (
     <div>
-      <h1 className="text-lg font-medium">
+      <h1 className="text-2xl font-bold tracking-tight text-text">
         Hola {usuario.nombre ?? usuario.email}
         {usuario.rol ? ` — ${usuario.rol.nombre}` : ""}
       </h1>
@@ -43,10 +50,19 @@ export default async function DashboardPage() {
         </p>
       )}
 
-      <h2 className="mt-8 text-sm font-medium text-text">Proyectos</h2>
+      <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <StatCard label="Proyectos" value={proyectos.length} icon={FolderKanban} />
+        <StatCard label="Clientes" value={clientesTotales} icon={Building2} />
+        <StatCard label="Protocolos en curso" value={protocolosEnCurso} icon={ListChecks} />
+        <StatCard label="Protocolos completos" value={protocolosCompletos} icon={CircleCheckBig} />
+      </div>
+
+      <h2 className="mt-10 text-xs font-semibold uppercase tracking-wide text-text-muted">
+        Proyectos
+      </h2>
 
       {proyectos.length === 0 ? (
-        <p className="mt-2 text-sm text-text-muted">
+        <p className="mt-3 text-sm text-text-muted">
           Todavia no hay proyectos.{" "}
           <Link href="/proyectos" className="text-accent underline">
             Crear uno
@@ -54,7 +70,7 @@ export default async function DashboardPage() {
           .
         </p>
       ) : (
-        <ul className="mt-2 space-y-3">
+        <ul className="mt-3 space-y-3">
           {proyectos.map((proyecto) => (
             <li key={proyecto.id}>
               <Card>

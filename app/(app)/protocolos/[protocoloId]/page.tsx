@@ -24,11 +24,11 @@ export default async function ProtocoloDetallePage({
 
   return (
     <div>
-      <h1 className="text-lg font-medium">{protocolo.nombre}</h1>
+      <h1 className="text-2xl font-bold tracking-tight text-text">{protocolo.nombre}</h1>
       <p className="mt-2 text-sm text-text-muted">{protocolo.objetivo}</p>
       <p className="mt-1 text-sm text-text-muted">{protocolo.alcance}</p>
 
-      <h2 className="mt-6 text-sm font-medium text-text">
+      <h2 className="mt-8 text-xs font-semibold uppercase tracking-wide text-text-muted">
         Checklist de referencia (v{versionVigente?.numeroVersion ?? "-"})
       </h2>
 

@@ -37,7 +37,7 @@ export default async function ProyectoPage({
 
   return (
     <div>
-      <h1 className="text-lg font-medium">{proyecto.nombre}</h1>
+      <h1 className="text-2xl font-bold tracking-tight text-text">{proyecto.nombre}</h1>
       <p className="text-sm text-text-muted">{proyecto.cliente.nombre}</p>
 
       <div className="mt-4 flex items-center gap-2">
@@ -49,7 +49,9 @@ export default async function ProyectoPage({
         />
       </div>
 
-      <h2 className="mt-8 text-sm font-medium text-text">Protocolos</h2>
+      <h2 className="mt-10 text-xs font-semibold uppercase tracking-wide text-text-muted">
+        Protocolos
+      </h2>
       <ul className="mt-2 space-y-3">
         {protocolos.map((protocolo) => {
           const ejecuciones = proyecto.ejecucionesProtocolo.filter(

@@ -11,7 +11,7 @@ export default async function ClientesPage() {
 
   return (
     <div>
-      <h1 className="text-lg font-medium">Clientes</h1>
+      <h1 className="text-2xl font-bold tracking-tight text-text">Clientes</h1>
 
       <Card className="mt-4">
         <NuevoClienteForm />

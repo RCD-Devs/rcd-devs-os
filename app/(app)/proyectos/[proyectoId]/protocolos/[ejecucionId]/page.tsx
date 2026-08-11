@@ -29,7 +29,9 @@ export default async function ChecklistEjecucionPage({
 
   return (
     <div>
-      <h1 className="text-lg font-medium">{ejecucion.versionProtocolo.protocolo.nombre}</h1>
+      <h1 className="text-2xl font-bold tracking-tight text-text">
+        {ejecucion.versionProtocolo.protocolo.nombre}
+      </h1>
       <div className="mt-2 flex items-center gap-3">
         <EstadoBadge estado={ejecucion.estado} />
         <ProgressBar value={progreso.completos} max={progreso.total} />

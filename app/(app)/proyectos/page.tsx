@@ -17,10 +17,12 @@ export default async function ProyectosPage() {
 
   return (
     <div>
-      <h1 className="text-lg font-medium">Proyectos</h1>
+      <h1 className="text-2xl font-bold tracking-tight text-text">Proyectos</h1>
 
-      <Card className="mt-4">
-        <h2 className="mb-3 text-sm font-medium text-text">Nuevo proyecto</h2>
+      <Card className="mt-6">
+        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-text-muted">
+          Nuevo proyecto
+        </h2>
         <NuevoProyectoForm clientes={clientes} etapas={etapas} />
       </Card>
 

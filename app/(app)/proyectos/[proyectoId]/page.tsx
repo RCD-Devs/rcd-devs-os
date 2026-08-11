@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { EtapaSelector } from "./EtapaSelector";
 import { IniciarProtocoloButton } from "./IniciarProtocoloButton";
+import { Card } from "@/components/ui/Card";
+import { EstadoBadge } from "@/components/ui/Badge";
 
 export default async function ProyectoPage({
   params,
@@ -32,12 +34,12 @@ export default async function ProyectoPage({
   ]);
 
   return (
-    <main className="flex-1 p-8">
+    <div>
       <h1 className="text-lg font-medium">{proyecto.nombre}</h1>
-      <p className="text-sm text-neutral-600">{proyecto.cliente.nombre}</p>
+      <p className="text-sm text-text-muted">{proyecto.cliente.nombre}</p>
 
       <div className="mt-4 flex items-center gap-2">
-        <span className="text-sm text-neutral-600">Etapa actual:</span>
+        <span className="text-sm text-text-muted">Etapa actual:</span>
         <EtapaSelector
           proyectoId={proyecto.id}
           etapas={etapas}
@@ -45,7 +47,7 @@ export default async function ProyectoPage({
         />
       </div>
 
-      <h2 className="mt-8 text-sm font-medium text-neutral-700">Protocolos</h2>
+      <h2 className="mt-8 text-sm font-medium text-text">Protocolos</h2>
       <ul className="mt-2 space-y-3">
         {protocolos.map((protocolo) => {
           const ejecuciones = proyecto.ejecucionesProtocolo.filter(
@@ -55,31 +57,32 @@ export default async function ProyectoPage({
             ejecuciones.find((e) => e.estado !== "Completo") ?? ejecuciones[0];
 
           return (
-            <li
-              key={protocolo.id}
-              className="flex items-center justify-between rounded border border-neutral-200 p-4"
-            >
-              <div>
-                <p className="font-medium">{protocolo.nombre}</p>
-                {ejecucion && (
-                  <p className="text-sm text-neutral-600">Estado: {ejecucion.estado}</p>
-                )}
-              </div>
+            <li key={protocolo.id}>
+              <Card className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">{protocolo.nombre}</p>
+                  {ejecucion && (
+                    <div className="mt-1">
+                      <EstadoBadge estado={ejecucion.estado} />
+                    </div>
+                  )}
+                </div>
 
-              {ejecucion ? (
-                <Link
-                  href={`/proyectos/${proyecto.id}/protocolos/${ejecucion.id}`}
-                  className="text-sm text-neutral-700 underline"
-                >
-                  Ver checklist
-                </Link>
-              ) : (
-                <IniciarProtocoloButton proyectoId={proyecto.id} protocoloId={protocolo.id} />
-              )}
+                {ejecucion ? (
+                  <Link
+                    href={`/proyectos/${proyecto.id}/protocolos/${ejecucion.id}`}
+                    className="text-sm text-accent underline"
+                  >
+                    Ver checklist
+                  </Link>
+                ) : (
+                  <IniciarProtocoloButton proyectoId={proyecto.id} protocoloId={protocolo.id} />
+                )}
+              </Card>
             </li>
           );
         })}
       </ul>
-    </main>
+    </div>
   );
 }

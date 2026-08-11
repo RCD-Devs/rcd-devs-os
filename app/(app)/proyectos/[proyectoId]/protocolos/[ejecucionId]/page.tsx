@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { EjecucionPasoRow } from "./EjecucionPasoRow";
+import { EstadoBadge } from "@/components/ui/Badge";
 
 export default async function ChecklistEjecucionPage({
   params,
@@ -24,15 +25,17 @@ export default async function ChecklistEjecucionPage({
   const estadosValidos = ejecucion.versionProtocolo.estadosJson as unknown as string[];
 
   return (
-    <main className="flex-1 p-8">
+    <div>
       <h1 className="text-lg font-medium">{ejecucion.versionProtocolo.protocolo.nombre}</h1>
-      <p className="text-sm text-neutral-600">Estado de la ejecucion: {ejecucion.estado}</p>
+      <div className="mt-2">
+        <EstadoBadge estado={ejecucion.estado} />
+      </div>
 
       <ul className="mt-6 space-y-3">
         {ejecucion.pasos.map((paso) => (
           <EjecucionPasoRow key={paso.id} paso={paso} estadosValidos={estadosValidos} />
         ))}
       </ul>
-    </main>
+    </div>
   );
 }

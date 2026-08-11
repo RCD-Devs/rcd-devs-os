@@ -2,6 +2,7 @@
 
 import { useTransition } from "react";
 import { actualizarEtapaProyecto } from "./actions";
+import { Select } from "@/components/ui/Select";
 
 export function EtapaSelector({
   proyectoId,
@@ -15,7 +16,7 @@ export function EtapaSelector({
   const [isPending, startTransition] = useTransition();
 
   return (
-    <select
+    <Select
       defaultValue={etapaActualId}
       disabled={isPending}
       onChange={(e) => {
@@ -24,13 +25,12 @@ export function EtapaSelector({
           actualizarEtapaProyecto(proyectoId, etapaId);
         });
       }}
-      className="rounded border border-neutral-300 px-3 py-2 text-sm"
     >
       {etapas.map((etapa) => (
         <option key={etapa.id} value={etapa.id}>
           {etapa.orden}. {etapa.nombre}
         </option>
       ))}
-    </select>
+    </Select>
   );
 }

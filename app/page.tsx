@@ -1,7 +1,7 @@
-export default function Home() {
-  return (
-    <main className="flex flex-1 items-center justify-center p-8">
-      <p className="text-sm text-neutral-500">RCD OS</p>
-    </main>
-  );
+import { redirect } from "next/navigation";
+import { getCurrentUser } from "@/lib/auth/getCurrentUser";
+
+export default async function Home() {
+  const usuario = await getCurrentUser();
+  redirect(usuario ? "/dashboard" : "/login");
 }

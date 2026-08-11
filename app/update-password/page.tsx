@@ -3,6 +3,9 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { Card } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
 
 export default function UpdatePasswordPage() {
   const router = useRouter();
@@ -29,15 +32,17 @@ export default function UpdatePasswordPage() {
   }
 
   return (
-    <main className="flex flex-1 items-center justify-center p-8">
-      <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
+    <main className="flex flex-1 flex-col items-center justify-center gap-6 bg-bg p-8">
+      <p className="text-sm font-semibold tracking-tight text-text">RCD OS</p>
+
+      <Card as="form" onSubmit={handleSubmit} className="w-full max-w-sm space-y-4 p-6">
         <h1 className="text-lg font-medium">Definir nueva contrasena</h1>
 
         <div className="space-y-1">
-          <label htmlFor="password" className="text-sm text-neutral-600">
+          <label htmlFor="password" className="text-sm text-text-muted">
             Contrasena nueva
           </label>
-          <input
+          <Input
             id="password"
             type="password"
             required
@@ -45,20 +50,15 @@ export default function UpdatePasswordPage() {
             autoComplete="new-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded border border-neutral-300 px-3 py-2 text-sm"
           />
         </div>
 
         {error && <p className="text-sm text-red-600">{error}</p>}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded bg-neutral-900 px-3 py-2 text-sm text-white disabled:opacity-50"
-        >
+        <Button type="submit" variant="primary" disabled={loading} className="w-full">
           {loading ? "Guardando..." : "Guardar"}
-        </button>
-      </form>
+        </Button>
+      </Card>
     </main>
   );
 }

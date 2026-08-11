@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Button } from "@/components/ui/Button";
 
 export function IniciarProtocoloButton({
   proyectoId,
@@ -37,13 +38,9 @@ export function IniciarProtocoloButton({
 
   return (
     <div>
-      <button
-        onClick={handleClick}
-        disabled={loading}
-        className="rounded border border-neutral-300 px-3 py-2 text-sm disabled:opacity-50"
-      >
+      <Button variant="primary" onClick={handleClick} disabled={loading}>
         {loading ? "Iniciando..." : "Iniciar protocolo"}
-      </button>
+      </Button>
       {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
     </div>
   );

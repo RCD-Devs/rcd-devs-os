@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { Card } from "@/components/ui/Card";
 
 // Ruta protegida por proxy.ts: nunca debe quedar cacheada estaticamente, y
 // ademas depende de datos reales de Supabase que no existen en build time.
@@ -11,22 +12,21 @@ export default async function ProtocolosPage() {
   });
 
   return (
-    <main className="flex-1 p-8">
+    <div>
       <h1 className="mb-6 text-lg font-medium">Protocolos</h1>
 
       <ul className="space-y-3">
         {protocolos.map((protocolo) => (
           <li key={protocolo.id}>
-            <Link
-              href={`/protocolos/${protocolo.id}`}
-              className="block rounded border border-neutral-200 p-4 hover:border-neutral-400"
-            >
-              <p className="font-medium">{protocolo.nombre}</p>
-              <p className="text-sm text-neutral-600">{protocolo.objetivo}</p>
+            <Link href={`/protocolos/${protocolo.id}`}>
+              <Card className="transition-colors hover:border-accent">
+                <p className="font-medium">{protocolo.nombre}</p>
+                <p className="mt-1 text-sm text-text-muted">{protocolo.objetivo}</p>
+              </Card>
             </Link>
           </li>
         ))}
       </ul>
-    </main>
+    </div>
   );
 }

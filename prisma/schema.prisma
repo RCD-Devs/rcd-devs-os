@@ -21,8 +21,9 @@ model Usuario {
   rolId  String? @map("rol_id") @db.Uuid
   rol    Rol?    @relation("UsuarioRol", fields: [rolId], references: [id])
 
-  rolesComoTitular   Rol[] @relation("RolTitular")
-  rolesComoReemplazo Rol[] @relation("RolReemplazo")
+  rolesComoTitular   Rol[]           @relation("RolTitular")
+  rolesComoReemplazo Rol[]           @relation("RolReemplazo")
+  pasosResponsable   EjecucionPaso[]
 
   @@map("Usuario")
 }
@@ -35,9 +36,109 @@ model Rol {
   titularId   String? @map("titular_id") @db.Uuid
   reemplazoId String? @map("reemplazo_id") @db.Uuid
 
-  titular   Usuario? @relation("RolTitular", fields: [titularId], references: [id])
-  reemplazo Usuario? @relation("RolReemplazo", fields: [reemplazoId], references: [id])
+  titular   Usuario?  @relation("RolTitular", fields: [titularId], references: [id])
+  reemplazo Usuario?  @relation("RolReemplazo", fields: [reemplazoId], references: [id])
   usuarios  Usuario[] @relation("UsuarioRol")
 
   @@map("Rol")
+}
+
+model Cliente {
+  id     String @id @default(uuid()) @db.Uuid
+  nombre String
+
+  proyectos Proyecto[]
+
+  @@map("Cliente")
+}
+
+/// Catalogo fijo de las 8 etapas oficiales del ciclo de vida (roadmap #1). Se siembra
+/// una sola vez; no hay UI para agregar/editar etapas en este spec.
+model Etapa {
+  id              String @id @default(uuid()) @db.Uuid
+  nombre          String @unique
+  orden           Int    @unique
+  gateDescripcion String @map("gate_descripcion")
+
+  proyectos Proyecto[]
+
+  @@map("Etapa")
+}
+
+/// Sin integracion JIRA en este spec: el proyecto se gestiona 100% dentro de RCD OS.
+model Proyecto {
+  id              String    @id @default(uuid()) @db.Uuid
+  clienteId       String    @map("cliente_id") @db.Uuid
+  nombre          String
+  etapaActualId   String    @map("etapa_actual_id") @db.Uuid
+  fechaInicio     DateTime? @map("fecha_inicio") @db.Date
+  fechaCompromiso DateTime? @map("fecha_compromiso") @db.Date
+
+  cliente     Cliente @relation(fields: [clienteId], references: [id])
+  etapaActual Etapa   @relation(fields: [etapaActualId], references: [id])
+
+  ejecucionesProtocolo EjecucionProtocolo[]
+
+  @@map("Proyecto")
+}
+
+model Protocolo {
+  id       String @id @default(uuid()) @db.Uuid
+  nombre   String @unique
+  objetivo String
+  alcance  String
+
+  versiones VersionProtocolo[]
+
+  @@map("Protocolo")
+}
+
+/// Plantilla congelada: pasosJson/estadosJson son la fuente desde la que se generan
+/// las filas EjecucionPaso cuando se inicia una ejecucion. Versionar aca es lo que
+/// permite publicar una v2 sin romper ejecuciones ya iniciadas con la v1.
+model VersionProtocolo {
+  id               String   @id @default(uuid()) @db.Uuid
+  protocoloId      String   @map("protocolo_id") @db.Uuid
+  numeroVersion    Int      @map("numero_version")
+  fechaPublicacion DateTime @default(now()) @map("fecha_publicacion")
+  /// Lista ordenada de pasos: [{ nombre: string, ... }]
+  pasosJson        Json     @map("pasos_json")
+  /// Lista ordenada de estados validos para esta version, ej. ["Pendiente","En curso","Completo","No aplica"]
+  estadosJson      Json     @map("estados_json")
+
+  protocolo   Protocolo            @relation(fields: [protocoloId], references: [id])
+  ejecuciones EjecucionProtocolo[]
+
+  @@unique([protocoloId, numeroVersion])
+  @@map("VersionProtocolo")
+}
+
+model EjecucionProtocolo {
+  id                 String    @id @default(uuid()) @db.Uuid
+  proyectoId         String    @map("proyecto_id") @db.Uuid
+  versionProtocoloId String    @map("version_protocolo_id") @db.Uuid
+  estado             String    @default("En curso")
+  fechaLimite        DateTime? @map("fecha_limite") @db.Date
+
+  proyecto         Proyecto         @relation(fields: [proyectoId], references: [id])
+  versionProtocolo VersionProtocolo @relation(fields: [versionProtocoloId], references: [id])
+  pasos            EjecucionPaso[]
+
+  @@map("EjecucionProtocolo")
+}
+
+model EjecucionPaso {
+  id             String    @id @default(uuid()) @db.Uuid
+  ejecucionId    String    @map("ejecucion_id") @db.Uuid
+  pasoNombre     String    @map("paso_nombre")
+  estado         String
+  responsableId  String?   @map("responsable_id") @db.Uuid
+  evidenciaUrl   String?   @map("evidencia_url")
+  fechaEjecucion DateTime? @map("fecha_ejecucion")
+  notas          String?
+
+  ejecucion   EjecucionProtocolo @relation(fields: [ejecucionId], references: [id])
+  responsable Usuario?           @relation(fields: [responsableId], references: [id])
+
+  @@map("EjecucionPaso")
 }

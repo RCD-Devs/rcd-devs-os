@@ -11,3 +11,33 @@ datasource db {
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
+
+/// Espejo de auth.users, sincronizado por trigger (ver migration.sql de trigger_usuario_sync).
+/// El id es el mismo UUID que Supabase Auth asigna al usuario.
+model Usuario {
+  id     String  @id @db.Uuid
+  nombre String?
+  email  String  @unique
+  rolId  String? @map("rol_id") @db.Uuid
+  rol    Rol?    @relation("UsuarioRol", fields: [rolId], references: [id])
+
+  rolesComoTitular   Rol[] @relation("RolTitular")
+  rolesComoReemplazo Rol[] @relation("RolReemplazo")
+
+  @@map("Usuario")
+}
+
+/// Catalogo fijo de roles del roadmap (roadmap.md #2). Se siembra por nombre; titular/reemplazo
+/// se asignan a mano despues (no hay UI de administracion en el spec de Auth).
+model Rol {
+  id          String  @id @default(uuid()) @db.Uuid
+  nombre      String  @unique
+  titularId   String? @map("titular_id") @db.Uuid
+  reemplazoId String? @map("reemplazo_id") @db.Uuid
+
+  titular   Usuario? @relation("RolTitular", fields: [titularId], references: [id])
+  reemplazo Usuario? @relation("RolReemplazo", fields: [reemplazoId], references: [id])
+  usuarios  Usuario[] @relation("UsuarioRol")
+
+  @@map("Rol")
+}

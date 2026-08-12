@@ -1,7 +1,8 @@
 "use client";
 
-import { useTransition } from "react";
-import { actualizarAsignacionRol } from "./actions";
+import { useState, useTransition } from "react";
+import { ShieldCheck } from "lucide-react";
+import { actualizarAsignacionRol, actualizarEsAdminRol } from "./actions";
 import { Card } from "@/components/ui/Card";
 import { Select } from "@/components/ui/Select";
 import { useToast } from "@/components/ui/Toast";
@@ -12,11 +13,18 @@ export function RolRow({
   rol,
   usuarios,
 }: {
-  rol: { id: string; nombre: string; titularId: string | null; reemplazoId: string | null };
+  rol: {
+    id: string;
+    nombre: string;
+    titularId: string | null;
+    reemplazoId: string | null;
+    esAdmin: boolean;
+  };
   usuarios: Usuario[];
 }) {
   const [isPending, startTransition] = useTransition();
   const { showToast } = useToast();
+  const [esAdminLocal, setEsAdminLocal] = useState(rol.esAdmin);
 
   function asignar(campo: "titularId" | "reemplazoId", usuarioId: string) {
     startTransition(async () => {
@@ -29,9 +37,31 @@ export function RolRow({
     });
   }
 
+  function alternarAdmin() {
+    const nuevoValor = !esAdminLocal;
+    setEsAdminLocal(nuevoValor);
+    startTransition(async () => {
+      try {
+        await actualizarEsAdminRol(rol.id, nuevoValor);
+        showToast(nuevoValor ? "Acceso admin activado" : "Acceso admin desactivado");
+      } catch (err) {
+        setEsAdminLocal(!nuevoValor);
+        showToast(err instanceof Error ? err.message : "No se pudo guardar", "error");
+      }
+    });
+  }
+
   return (
     <Card className="flex flex-wrap items-center justify-between gap-4">
-      <p className="font-medium">{rol.nombre}</p>
+      <div className="flex items-center gap-2">
+        <p className="font-medium">{rol.nombre}</p>
+        {esAdminLocal && (
+          <span className="flex items-center gap-1 rounded-full bg-chart-2-bg px-2 py-0.5 text-xs font-medium text-chart-2">
+            <ShieldCheck size={11} strokeWidth={2} />
+            Admin
+          </span>
+        )}
+      </div>
 
       <div className="flex flex-wrap items-center gap-3">
         <label className="flex items-center gap-2 text-sm text-text-muted">
@@ -64,6 +94,17 @@ export function RolRow({
               </option>
             ))}
           </Select>
+        </label>
+
+        <label className="flex items-center gap-1.5 text-sm text-text-muted">
+          <input
+            type="checkbox"
+            checked={esAdminLocal}
+            disabled={isPending}
+            onChange={alternarAdmin}
+            className="size-4 rounded border-border accent-accent"
+          />
+          Acceso admin
         </label>
       </div>
     </Card>

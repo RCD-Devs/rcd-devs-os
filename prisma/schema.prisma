@@ -38,6 +38,10 @@ model Rol {
   nombre      String  @unique
   titularId   String? @map("titular_id") @db.Uuid
   reemplazoId String? @map("reemplazo_id") @db.Uuid
+  /// Control total: Roles/permisos + cualquier CRUD del resto de la app.
+  /// Fijo a Lider tecnico y Director/a por decision del equipo, editable
+  /// despues desde /roles por cualquier admin existente.
+  esAdmin     Boolean @default(false) @map("es_admin")
 
   titular     Usuario?    @relation("RolTitular", fields: [titularId], references: [id])
   reemplazo   Usuario?    @relation("RolReemplazo", fields: [reemplazoId], references: [id])

@@ -12,23 +12,32 @@ import {
   Inbox,
   LayoutDashboard,
   Menu,
+  User,
   Users,
   X,
 } from "lucide-react";
 import { LogoutButton } from "@/components/LogoutButton";
 
 const NAV_LINKS = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/alertas", label: "Alertas", icon: Bell },
-  { href: "/protocolos", label: "Protocolos", icon: ClipboardList },
-  { href: "/proyectos", label: "Proyectos", icon: FolderKanban },
-  { href: "/clientes", label: "Clientes", icon: Building2 },
-  { href: "/solicitudes", label: "Solicitudes", icon: Inbox },
-  { href: "/roles", label: "Roles", icon: Users },
-  { href: "/auditoria", label: "Auditoría", icon: History },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, adminOnly: false },
+  { href: "/alertas", label: "Alertas", icon: Bell, adminOnly: false },
+  { href: "/protocolos", label: "Protocolos", icon: ClipboardList, adminOnly: false },
+  { href: "/proyectos", label: "Proyectos", icon: FolderKanban, adminOnly: false },
+  { href: "/clientes", label: "Clientes", icon: Building2, adminOnly: false },
+  { href: "/solicitudes", label: "Solicitudes", icon: Inbox, adminOnly: false },
+  { href: "/auditoria", label: "Auditoría", icon: History, adminOnly: false },
+  // Solo Lider tecnico y Director/a (Rol.esAdmin): roles y configuracion de
+  // permisos, no el resto de la operacion diaria.
+  { href: "/roles", label: "Roles", icon: Users, adminOnly: true },
 ];
 
-export function Sidebar() {
+export function Sidebar({
+  esAdmin,
+  nombre,
+}: {
+  esAdmin: boolean;
+  nombre: string | null;
+}) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   // Cierra el drawer mobile al navegar: se ajusta durante el render (patron
@@ -39,6 +48,8 @@ export function Sidebar() {
     setPathnameAnterior(pathname);
     setOpen(false);
   }
+
+  const links = NAV_LINKS.filter((link) => !link.adminOnly || esAdmin);
 
   return (
     <>
@@ -84,7 +95,7 @@ export function Sidebar() {
         </div>
 
         <nav className="flex-1 space-y-1 px-3">
-          {NAV_LINKS.map((link) => {
+          {links.map((link) => {
             const active = pathname === link.href || pathname.startsWith(`${link.href}/`);
             const Icon = link.icon;
 
@@ -104,7 +115,18 @@ export function Sidebar() {
         </nav>
 
         <div className="border-t border-border p-3">
-          <LogoutButton className="w-full justify-start gap-2.5 border-none px-3 shadow-none" />
+          <Link
+            href="/perfil"
+            className={`flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+              pathname === "/perfil"
+                ? "bg-accent/10 text-accent"
+                : "text-text-muted hover:bg-bg hover:text-text"
+            }`}
+          >
+            <User size={17} strokeWidth={2} />
+            <span className="truncate">{nombre ?? "Perfil"}</span>
+          </Link>
+          <LogoutButton className="mt-1 w-full justify-start gap-2.5 border-none px-3 shadow-none" />
         </div>
       </aside>
     </>

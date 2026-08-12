@@ -2,14 +2,16 @@ import { PrismaClient, type Prisma } from "../app/generated/prisma/client";
 
 const prisma = new PrismaClient();
 
-// Roles fijos del roadmap (RCD-OS-Roadmap.md #2). titular_id/reemplazo_id se
-// completan a mano despues, no hay UI de administracion todavia.
+// Roles fijos del roadmap (RCD-OS-Roadmap.md #2) + Director/a (control total,
+// mismo nivel que Lider tecnico). titular_id/reemplazo_id se completan desde
+// /roles. esAdmin determina quien ve Roles/config de permisos: solo estos dos.
 const ROLES = [
-  "Líder técnico",
-  "Infraestructura / Plataforma",
-  "Desarrollador backend/frontend",
-  "Líder de proyecto/cliente",
-  "Legal",
+  { nombre: "Líder técnico", esAdmin: true },
+  { nombre: "Director/a", esAdmin: true },
+  { nombre: "Infraestructura / Plataforma", esAdmin: false },
+  { nombre: "Desarrollador backend/frontend", esAdmin: false },
+  { nombre: "Líder de proyecto/cliente", esAdmin: false },
+  { nombre: "Legal", esAdmin: false },
 ];
 
 // Las 8 etapas oficiales del ciclo de vida (roadmap #1). Catalogo fijo, no hay
@@ -345,11 +347,11 @@ const PASOS_COOKIES_DATOS = [
 const ESTADOS_COOKIES_DATOS = ["Pendiente", "En curso", "Completo", "No aplica"];
 
 async function seedRoles() {
-  for (const nombre of ROLES) {
+  for (const rol of ROLES) {
     await prisma.rol.upsert({
-      where: { nombre },
-      update: {},
-      create: { nombre },
+      where: { nombre: rol.nombre },
+      update: { esAdmin: rol.esAdmin },
+      create: { nombre: rol.nombre, esAdmin: rol.esAdmin },
     });
   }
 }

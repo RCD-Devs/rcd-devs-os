@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
+import { registrarEvento } from "@/lib/auditoria";
 import { calcularEstadoEjecucion, esEstadoTerminal, esEstadoValido } from "@/lib/protocolos/estados";
 
 export async function PATCH(
@@ -62,6 +63,18 @@ export async function PATCH(
   await prisma.ejecucionProtocolo.update({
     where: { id: paso.ejecucionId },
     data: { estado: calcularEstadoEjecucion(pasosEjecucion) },
+  });
+
+  await registrarEvento({
+    entidad: "EjecucionPaso",
+    entidadId: id,
+    usuarioId: user.id,
+    accion: "actualizado",
+    detalle: {
+      pasoNombre: paso.pasoNombre,
+      estadoAnterior: paso.estado,
+      estadoNuevo: nuevoEstado,
+    },
   });
 
   return NextResponse.json(pasoActualizado);

@@ -6,6 +6,7 @@ import { crearProyecto } from "./actions";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
+import { slugConId } from "@/lib/slug";
 
 export function NuevoProyectoForm({
   clientes,
@@ -28,7 +29,7 @@ export function NuevoProyectoForm({
 
     try {
       const proyecto = await crearProyecto({ nombre, clienteId, etapaActualId });
-      router.push(`/proyectos/${proyecto.id}`);
+      router.push(`/proyectos/${slugConId(proyecto.nombre, proyecto.id)}`);
     } catch (err) {
       setLoading(false);
       setError(err instanceof Error ? err.message : "No se pudo crear el proyecto");

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
+import { registrarEvento } from "@/lib/auditoria";
 
 export async function crearProyecto(input: {
   nombre: string;
@@ -28,6 +29,14 @@ export async function crearProyecto(input: {
       clienteId: input.clienteId,
       etapaActualId: input.etapaActualId,
     },
+  });
+
+  await registrarEvento({
+    entidad: "Proyecto",
+    entidadId: proyecto.id,
+    usuarioId: user.id,
+    accion: "creado",
+    detalle: { nombre: proyecto.nombre },
   });
 
   revalidatePath("/proyectos");

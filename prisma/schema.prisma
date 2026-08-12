@@ -21,9 +21,12 @@ model Usuario {
   rolId  String? @map("rol_id") @db.Uuid
   rol    Rol?    @relation("UsuarioRol", fields: [rolId], references: [id])
 
-  rolesComoTitular   Rol[]           @relation("RolTitular")
-  rolesComoReemplazo Rol[]           @relation("RolReemplazo")
+  rolesComoTitular   Rol[]             @relation("RolTitular")
+  rolesComoReemplazo Rol[]             @relation("RolReemplazo")
   pasosResponsable   EjecucionPaso[]
+  solicitudesCreadas Solicitud[]       @relation("SolicitudSolicitante")
+  eventosAuditoria   EventoAuditoria[]
+  comentarios        Comentario[]
 
   @@map("Usuario")
 }
@@ -36,9 +39,10 @@ model Rol {
   titularId   String? @map("titular_id") @db.Uuid
   reemplazoId String? @map("reemplazo_id") @db.Uuid
 
-  titular   Usuario?  @relation("RolTitular", fields: [titularId], references: [id])
-  reemplazo Usuario?  @relation("RolReemplazo", fields: [reemplazoId], references: [id])
-  usuarios  Usuario[] @relation("UsuarioRol")
+  titular     Usuario?    @relation("RolTitular", fields: [titularId], references: [id])
+  reemplazo   Usuario?    @relation("RolReemplazo", fields: [reemplazoId], references: [id])
+  usuarios    Usuario[]   @relation("UsuarioRol")
+  solicitudes Solicitud[]
 
   @@map("Rol")
 }
@@ -78,6 +82,7 @@ model Proyecto {
   etapaActual Etapa   @relation(fields: [etapaActualId], references: [id])
 
   ejecucionesProtocolo EjecucionProtocolo[]
+  solicitudes          Solicitud[]
 
   @@map("Proyecto")
 }
@@ -139,6 +144,63 @@ model EjecucionPaso {
 
   ejecucion   EjecucionProtocolo @relation(fields: [ejecucionId], references: [id])
   responsable Usuario?           @relation(fields: [responsableId], references: [id])
+  comentarios Comentario[]
 
   @@map("EjecucionPaso")
+}
+
+/// Flujo de solicitud interno (roadmap #5), sin integracion JIRA: formulario
+/// -> se asigna a un rol (no a una persona) -> se resuelve. `tipo` es texto
+/// libre a proposito (constructor simple, mismo criterio que Protocolo/Paso)
+/// en vez de un catalogo fijo que el roadmap no llego a definir.
+model Solicitud {
+  id               String    @id @default(uuid()) @db.Uuid
+  proyectoId       String    @map("proyecto_id") @db.Uuid
+  tipo             String
+  descripcion      String?
+  estado           String    @default("Pendiente")
+  solicitanteId    String    @map("solicitante_id") @db.Uuid
+  responsableRolId String    @map("responsable_rol_id") @db.Uuid
+  slaFechaLimite   DateTime? @map("sla_fecha_limite") @db.Date
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  proyecto       Proyecto @relation(fields: [proyectoId], references: [id])
+  solicitante    Usuario  @relation("SolicitudSolicitante", fields: [solicitanteId], references: [id])
+  responsableRol Rol      @relation(fields: [responsableRolId], references: [id])
+
+  @@map("Solicitud")
+}
+
+/// Append-only (roadmap #6): nunca se borra ni edita una fila desde la app.
+/// `entidad`/`entidadId` apuntan a la fila afectada (ej. "Proyecto", uuid) sin
+/// FK real, porque puede referenciar cualquier tabla.
+model EventoAuditoria {
+  id        String   @id @default(uuid()) @db.Uuid
+  entidad   String
+  entidadId String   @map("entidad_id") @db.Uuid
+  usuarioId String?  @map("usuario_id") @db.Uuid
+  accion    String
+  detalle   Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  usuario Usuario? @relation(fields: [usuarioId], references: [id])
+
+  @@index([entidad, entidadId])
+  @@map("EventoAuditoria")
+}
+
+/// Historial de comentarios por paso de checklist (no estaba en el roadmap
+/// original): el campo "notas" de EjecucionPaso es unico y se sobreescribe,
+/// esto permite que varias personas dejen contexto sin pisarse.
+model Comentario {
+  id              String   @id @default(uuid()) @db.Uuid
+  ejecucionPasoId String   @map("ejecucion_paso_id") @db.Uuid
+  autorId         String   @map("autor_id") @db.Uuid
+  texto           String
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  ejecucionPaso EjecucionPaso @relation(fields: [ejecucionPasoId], references: [id])
+  autor         Usuario       @relation(fields: [autorId], references: [id])
+
+  @@map("Comentario")
 }

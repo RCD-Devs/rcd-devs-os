@@ -1,13 +1,17 @@
 import { prisma } from "@/lib/prisma";
 import { Card } from "@/components/ui/Card";
 import { NuevoClienteForm } from "./NuevoClienteForm";
+import { ClientesList } from "./ClientesList";
 
 // Ruta protegida por proxy.ts, depende de datos reales de Supabase: nunca
 // prerenderizar estaticamente (mismo criterio que /protocolos).
 export const dynamic = "force-dynamic";
 
 export default async function ClientesPage() {
-  const clientes = await prisma.cliente.findMany({ orderBy: { nombre: "asc" } });
+  const clientes = await prisma.cliente.findMany({
+    include: { _count: { select: { proyectos: true } } },
+    orderBy: { nombre: "asc" },
+  });
 
   return (
     <div>
@@ -17,17 +21,7 @@ export default async function ClientesPage() {
         <NuevoClienteForm />
       </Card>
 
-      {clientes.length === 0 ? (
-        <p className="mt-6 text-sm text-text-muted">Todavia no hay clientes.</p>
-      ) : (
-        <ul className="mt-6 space-y-2">
-          {clientes.map((cliente) => (
-            <li key={cliente.id}>
-              <Card>{cliente.nombre}</Card>
-            </li>
-          ))}
-        </ul>
-      )}
+      <ClientesList clientes={clientes} />
     </div>
   );
 }

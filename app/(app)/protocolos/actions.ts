@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { Prisma } from "@/app/generated/prisma/client";
+import { registrarEvento } from "@/lib/auditoria";
 
 // Estados fijos del constructor simple: mismo set que "Elementos basicos de
 // sitio web". No hay UI para definir estados personalizados en este pase
@@ -60,6 +61,14 @@ export async function crearProtocolo(input: {
     }
     throw error;
   }
+
+  await registrarEvento({
+    entidad: "Protocolo",
+    entidadId: protocolo.id,
+    usuarioId: user.id,
+    accion: "creado",
+    detalle: { nombre: protocolo.nombre, pasos: pasos.length },
+  });
 
   revalidatePath("/protocolos");
 

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
+import { registrarEvento } from "@/lib/auditoria";
 
 export async function crearCliente(nombre: string) {
   const supabase = await createClient();
@@ -19,6 +20,14 @@ export async function crearCliente(nombre: string) {
   }
 
   const cliente = await prisma.cliente.create({ data: { nombre: nombre.trim() } });
+
+  await registrarEvento({
+    entidad: "Cliente",
+    entidadId: cliente.id,
+    usuarioId: user.id,
+    accion: "creado",
+    detalle: { nombre: cliente.nombre },
+  });
 
   revalidatePath("/clientes");
 

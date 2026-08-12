@@ -7,7 +7,9 @@ const VARIANT_CLASSES = {
 };
 
 // "No aplica" es terminal pero no es un exito -> se pinta neutro, no verde.
-function variantParaEstado(estado: string): keyof typeof VARIANT_CLASSES {
+// Exportada para que otras vistas (ej. checklist de ejecucion) puedan aplicar
+// la misma clasificacion de color a iconos/bordes, no solo al badge de texto.
+export function variantParaEstado(estado: string): keyof typeof VARIANT_CLASSES {
   if (estado === "No aplica") {
     return "neutral";
   }

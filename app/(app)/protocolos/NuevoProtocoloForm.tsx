@@ -6,6 +6,7 @@ import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
 import { crearProtocolo } from "./actions";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { slugify } from "@/lib/slug";
 
 export function NuevoProtocoloForm() {
   const router = useRouter();
@@ -46,7 +47,7 @@ export function NuevoProtocoloForm() {
 
     try {
       const protocolo = await crearProtocolo({ nombre, objetivo, alcance, pasos });
-      router.push(`/protocolos/${protocolo.id}`);
+      router.push(`/protocolos/${slugify(protocolo.nombre)}`);
     } catch (err) {
       setLoading(false);
       setError(err instanceof Error ? err.message : "No se pudo crear el protocolo");

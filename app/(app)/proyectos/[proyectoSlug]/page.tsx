@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { EtapaSelector } from "./EtapaSelector";
@@ -6,14 +7,27 @@ import { IniciarProtocoloButton } from "./IniciarProtocoloButton";
 import { Card } from "@/components/ui/Card";
 import { EstadoBadge } from "@/components/ui/Badge";
 import { ProgressBar } from "@/components/ui/ProgressBar";
+import { SemaforoDot } from "@/components/ui/SemaforoDot";
 import { contarProgreso } from "@/lib/protocolos/estados";
+import { calcularSemaforo, SEMAFORO_LABEL } from "@/lib/proyectos/semaforo";
+import { slugConId } from "@/lib/slug";
 
 export default async function ProyectoPage({
   params,
 }: {
-  params: Promise<{ proyectoId: string }>;
+  params: Promise<{ proyectoSlug: string }>;
 }) {
-  const { proyectoId } = await params;
+  const { proyectoSlug } = await params;
+
+  // El nombre de Proyecto no es unico (a diferencia de Protocolo), asi que el
+  // slug lleva un sufijo de id: se resuelve comparando contra todos los
+  // proyectos en vez de una columna dedicada.
+  const candidatos = await prisma.proyecto.findMany({ select: { id: true, nombre: true } });
+  const proyectoId = candidatos.find((p) => slugConId(p.nombre, p.id) === proyectoSlug)?.id;
+
+  if (!proyectoId) {
+    notFound();
+  }
 
   const proyecto = await prisma.proyecto.findUnique({
     where: { id: proyectoId },
@@ -35,15 +49,30 @@ export default async function ProyectoPage({
     prisma.protocolo.findMany({ orderBy: { nombre: "asc" } }),
   ]);
 
+  const semaforo = calcularSemaforo(proyecto);
+
   return (
     <div>
-      <h1 className="text-2xl font-bold tracking-tight text-text">{proyecto.nombre}</h1>
+      <Link
+        href="/proyectos"
+        className="flex items-center gap-1 text-sm text-text-muted hover:text-accent"
+      >
+        <ChevronLeft size={16} strokeWidth={2} />
+        Proyectos
+      </Link>
+
+      <div className="mt-2 flex items-center gap-2">
+        <SemaforoDot semaforo={semaforo} />
+        <h1 className="text-2xl font-bold tracking-tight text-text">{proyecto.nombre}</h1>
+        <span className="text-xs text-text-muted">{SEMAFORO_LABEL[semaforo]}</span>
+      </div>
       <p className="text-sm text-text-muted">{proyecto.cliente.nombre}</p>
 
       <div className="mt-4 flex items-center gap-2">
         <span className="text-sm text-text-muted">Etapa actual:</span>
         <EtapaSelector
           proyectoId={proyecto.id}
+          proyectoSlug={proyectoSlug}
           etapas={etapas}
           etapaActualId={proyecto.etapaActualId}
         />
@@ -76,7 +105,7 @@ export default async function ProyectoPage({
 
                 {ejecucion ? (
                   <Link
-                    href={`/proyectos/${proyecto.id}/protocolos/${ejecucion.id}`}
+                    href={`/proyectos/${proyectoSlug}/protocolos/${ejecucion.id}`}
                     className="text-sm text-accent underline"
                   >
                     Ver checklist

@@ -2,50 +2,111 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Building2, ClipboardList, FolderKanban, LayoutDashboard } from "lucide-react";
+import { useState } from "react";
+import {
+  Bell,
+  Building2,
+  ClipboardList,
+  FolderKanban,
+  History,
+  Inbox,
+  LayoutDashboard,
+  Menu,
+  Users,
+  X,
+} from "lucide-react";
 import { LogoutButton } from "@/components/LogoutButton";
 
 const NAV_LINKS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/alertas", label: "Alertas", icon: Bell },
   { href: "/protocolos", label: "Protocolos", icon: ClipboardList },
   { href: "/proyectos", label: "Proyectos", icon: FolderKanban },
   { href: "/clientes", label: "Clientes", icon: Building2 },
+  { href: "/solicitudes", label: "Solicitudes", icon: Inbox },
+  { href: "/roles", label: "Roles", icon: Users },
+  { href: "/auditoria", label: "Auditoría", icon: History },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+  // Cierra el drawer mobile al navegar: se ajusta durante el render (patron
+  // React de "adjust state when a prop changes"), no en un efecto, para
+  // evitar el frame extra de un setState dentro de useEffect.
+  const [pathnameAnterior, setPathnameAnterior] = useState(pathname);
+  if (pathname !== pathnameAnterior) {
+    setPathnameAnterior(pathname);
+    setOpen(false);
+  }
 
   return (
-    <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col border-r border-border bg-surface">
-      <div className="px-5 py-6">
+    <>
+      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-border bg-surface px-4 py-3 md:hidden print:hidden">
         <Link href="/dashboard" className="text-sm font-bold tracking-tight text-text">
           RCD OS
         </Link>
-      </div>
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label="Abrir menu"
+          className="flex size-9 items-center justify-center rounded-md text-text-muted hover:bg-bg hover:text-text"
+        >
+          <Menu size={20} strokeWidth={2} />
+        </button>
+      </header>
 
-      <nav className="flex-1 space-y-1 px-3">
-        {NAV_LINKS.map((link) => {
-          const active = pathname === link.href || pathname.startsWith(`${link.href}/`);
-          const Icon = link.icon;
+      {open && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40 md:hidden"
+          onClick={() => setOpen(false)}
+          aria-hidden="true"
+        />
+      )}
 
-          return (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                active ? "bg-accent/10 text-accent" : "text-text-muted hover:bg-bg hover:text-text"
-              }`}
-            >
-              <Icon size={17} strokeWidth={2} />
-              {link.label}
-            </Link>
-          );
-        })}
-      </nav>
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 flex h-screen w-64 shrink-0 -translate-x-full flex-col border-r border-border bg-surface transition-transform duration-200 md:sticky md:top-0 md:z-auto md:w-60 md:translate-x-0 print:hidden ${
+          open ? "translate-x-0" : ""
+        }`}
+      >
+        <div className="flex items-center justify-between px-5 py-6">
+          <Link href="/dashboard" className="text-sm font-bold tracking-tight text-text">
+            RCD OS
+          </Link>
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            aria-label="Cerrar menu"
+            className="flex size-8 items-center justify-center rounded-md text-text-muted hover:bg-bg hover:text-text md:hidden"
+          >
+            <X size={18} strokeWidth={2} />
+          </button>
+        </div>
 
-      <div className="border-t border-border p-3">
-        <LogoutButton className="w-full justify-start gap-2.5 border-none px-3 shadow-none" />
-      </div>
-    </aside>
+        <nav className="flex-1 space-y-1 px-3">
+          {NAV_LINKS.map((link) => {
+            const active = pathname === link.href || pathname.startsWith(`${link.href}/`);
+            const Icon = link.icon;
+
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                  active ? "bg-accent/10 text-accent" : "text-text-muted hover:bg-bg hover:text-text"
+                }`}
+              >
+                <Icon size={17} strokeWidth={2} />
+                {link.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="border-t border-border p-3">
+          <LogoutButton className="w-full justify-start gap-2.5 border-none px-3 shadow-none" />
+        </div>
+      </aside>
+    </>
   );
 }

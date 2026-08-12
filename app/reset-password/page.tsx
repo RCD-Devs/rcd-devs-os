@@ -2,6 +2,9 @@
 
 import { useState, type FormEvent } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { Card } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
 
 export default function ResetPasswordPage() {
   const [email, setEmail] = useState("");
@@ -21,40 +24,38 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <main className="flex flex-1 items-center justify-center p-8">
-      <div className="w-full max-w-sm space-y-4">
+    <main className="flex flex-1 flex-col items-center justify-center gap-6 bg-bg p-8">
+      <p className="text-sm font-semibold tracking-tight text-text">RCD OS</p>
+
+      <Card className="w-full max-w-sm p-6">
         <h1 className="text-lg font-medium">Recuperar contrasena</h1>
 
         {submitted ? (
-          <p className="text-sm text-neutral-600">
+          <p className="mt-4 text-sm text-text-muted">
             Si el email existe en el sistema, se envio un link para restablecer la contrasena.
           </p>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="mt-4 space-y-4">
             <div className="space-y-1">
-              <label htmlFor="email" className="text-sm text-neutral-600">
+              <label htmlFor="email" className="text-sm text-text-muted">
                 Email
               </label>
-              <input
+              <Input
                 id="email"
                 type="email"
                 required
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded border border-neutral-300 px-3 py-2 text-sm"
               />
             </div>
 
-            <button
-              type="submit"
-              className="w-full rounded bg-neutral-900 px-3 py-2 text-sm text-white"
-            >
+            <Button type="submit" variant="primary" className="w-full">
               Enviar link
-            </button>
+            </Button>
           </form>
         )}
-      </div>
+      </Card>
     </main>
   );
 }

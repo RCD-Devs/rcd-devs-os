@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calcularEstadoEjecucion, esEstadoTerminal, esEstadoValido } from "./estados";
+import { calcularEstadoEjecucion, contarProgreso, esEstadoTerminal, esEstadoValido } from "./estados";
 
 describe("esEstadoValido", () => {
   const estados = ["Pendiente", "En curso", "Completo", "No aplica"];
@@ -39,5 +39,16 @@ describe("calcularEstadoEjecucion", () => {
 
   it("una lista de pasos vacia no se considera Completa", () => {
     expect(calcularEstadoEjecucion([])).toBe("En curso");
+  });
+});
+
+describe("contarProgreso", () => {
+  it("cuenta solo los pasos en estado terminal", () => {
+    const pasos = [{ estado: "Completo" }, { estado: "Pendiente" }, { estado: "No aplica" }];
+    expect(contarProgreso(pasos)).toEqual({ completos: 2, total: 3 });
+  });
+
+  it("una lista vacia da 0/0", () => {
+    expect(contarProgreso([])).toEqual({ completos: 0, total: 0 });
   });
 });

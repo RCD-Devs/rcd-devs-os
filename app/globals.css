@@ -1,26 +1,65 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-bg: #fafafa;
+  --color-surface: #ffffff;
+  --color-border: #e5e5e5;
+  --color-text: #171717;
+  --color-text-muted: #6b6b6b;
+
+  --color-accent: #2563eb;
+  --color-accent-foreground: #ffffff;
+
+  --color-success: #16a34a;
+  --color-success-bg: #f0fdf4;
+  --color-warning: #b45309;
+  --color-warning-bg: #fffbeb;
+  --color-neutral-badge: #6b6b6b;
+  --color-neutral-badge-bg: #f5f5f5;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --color-bg: var(--color-bg);
+  --color-surface: var(--color-surface);
+  --color-border: var(--color-border);
+  --color-text: var(--color-text);
+  --color-text-muted: var(--color-text-muted);
+  --color-accent: var(--color-accent);
+  --color-accent-foreground: var(--color-accent-foreground);
+  --color-success: var(--color-success);
+  --color-success-bg: var(--color-success-bg);
+  --color-warning: var(--color-warning);
+  --color-warning-bg: var(--color-warning-bg);
+  --color-neutral-badge: var(--color-neutral-badge);
+  --color-neutral-badge-bg: var(--color-neutral-badge-bg);
+
+  /* Satoshi para producto/UI, Geist Mono para datos tecnicos (fechas, ids, contadores). */
+  --font-sans: "Satoshi", var(--font-geist-mono), ui-sans-serif, sans-serif;
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --color-bg: #0a0a0a;
+    --color-surface: #141414;
+    --color-border: #2a2a2a;
+    --color-text: #ededed;
+    --color-text-muted: #a1a1a1;
+
+    --color-accent: #3b82f6;
+    --color-accent-foreground: #0a0a0a;
+
+    --color-success: #4ade80;
+    --color-success-bg: #052e16;
+    --color-warning: #fbbf24;
+    --color-warning-bg: #451a03;
+    --color-neutral-badge: #a1a1a1;
+    --color-neutral-badge-bg: #1f1f1f;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
 }

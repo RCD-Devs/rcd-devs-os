@@ -104,7 +104,7 @@ Se va tildando a medida que se implementa.
 - [x] #16 Comentarios en Solicitudes (modelo nuevo)
 - [x] #11 Adjuntar múltiples archivos por paso (modelo nuevo)
 - [x] #14 Timeline de proyecto
-- [ ] #17 Picker de usuario con búsqueda
+- [x] #17 Picker de usuario con búsqueda
 
 **Tier 4 — grande / depende de una decisión externa**
 - [ ] #23 RLS diferenciado por rol (sensible: cambia policies en producción)
@@ -144,7 +144,7 @@ Propuestas propias, agrupadas por área. Ninguna depende de JIRA. El check indic
 14. ✅ **Timeline de proyecto** (`/proyectos/[slug]/timeline`) — `EventoAuditoria` filtrado por `entidad: "Proyecto"` y el id del proyecto, agrupado en una línea de tiempo vertical (creación, cambios de etapa con nombre de etapa anterior/nueva, archivar/desarchivar); link desde el detalle del proyecto.
 15. ✅ **Archivar proyectos completados** — columna `Proyecto.archivado` (migración `20260813160000_add_proyecto_archivado`); toggle "Archivar"/"Desarchivar" en el detalle del proyecto. Excluido por defecto de `/proyectos` (con tab "Activos/Archivados"), `/dashboard`, `/alertas` y del selector de proyecto al crear una Solicitud.
 16. ✅ **Comentarios en Solicitudes** — modelo `ComentarioSolicitud` nuevo (migración `20260813170000_add_comentario_solicitud`, mismo criterio de RLS que `Comentario`), sección expandible en cada `SolicitudRow` igual al patrón ya usado en pasos de checklist.
-17. **Picker de usuario con búsqueda** — el selector de titular/reemplazo en `/roles` y el de responsable en `/usuarios` son `<select>` simples; con más usuarios conviene un combobox con búsqueda.
+17. ✅ **Picker de usuario con búsqueda** (`components/ui/UsuarioPicker.tsx`) — combobox con filtro por nombre/email, aplicado a titular/reemplazo en `/roles`. El otro selector que mencionaba la propuesta original ("responsable en /usuarios") resultó ser un selector de *Rol* en `UsuarioRow`, no de Usuario — catálogo de 8 roles fijos, un combobox con búsqueda no aporta ahí.
 
 ### Calidad y mantenibilidad
 

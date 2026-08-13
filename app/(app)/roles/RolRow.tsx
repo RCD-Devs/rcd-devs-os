@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { ShieldCheck } from "lucide-react";
 import { actualizarAsignacionRol, actualizarEsAdminRol } from "./actions";
 import { Card } from "@/components/ui/Card";
-import { Select } from "@/components/ui/Select";
+import { UsuarioPicker } from "@/components/ui/UsuarioPicker";
 import { useToast } from "@/components/ui/Toast";
 
 type Usuario = { id: string; nombre: string | null; email: string };
@@ -26,9 +26,9 @@ export function RolRow({
   const { showToast } = useToast();
   const [esAdminLocal, setEsAdminLocal] = useState(rol.esAdmin);
 
-  function asignar(campo: "titularId" | "reemplazoId", usuarioId: string) {
+  function asignar(campo: "titularId" | "reemplazoId", usuarioId: string | null) {
     startTransition(async () => {
-      const result = await actualizarAsignacionRol(rol.id, campo, usuarioId || null);
+      const result = await actualizarAsignacionRol(rol.id, campo, usuarioId);
       if (!result.ok) {
         showToast(result.error, "error");
       } else {
@@ -66,34 +66,22 @@ export function RolRow({
       <div className="flex flex-wrap items-center gap-3">
         <label className="flex items-center gap-2 text-sm text-text-muted">
           Titular
-          <Select
-            defaultValue={rol.titularId ?? ""}
+          <UsuarioPicker
+            usuarios={usuarios}
+            value={rol.titularId}
             disabled={isPending}
-            onChange={(e) => asignar("titularId", e.target.value)}
-          >
-            <option value="">Sin asignar</option>
-            {usuarios.map((u) => (
-              <option key={u.id} value={u.id}>
-                {u.nombre ?? u.email}
-              </option>
-            ))}
-          </Select>
+            onChange={(usuarioId) => asignar("titularId", usuarioId)}
+          />
         </label>
 
         <label className="flex items-center gap-2 text-sm text-text-muted">
           Reemplazo
-          <Select
-            defaultValue={rol.reemplazoId ?? ""}
+          <UsuarioPicker
+            usuarios={usuarios}
+            value={rol.reemplazoId}
             disabled={isPending}
-            onChange={(e) => asignar("reemplazoId", e.target.value)}
-          >
-            <option value="">Sin asignar</option>
-            {usuarios.map((u) => (
-              <option key={u.id} value={u.id}>
-                {u.nombre ?? u.email}
-              </option>
-            ))}
-          </Select>
+            onChange={(usuarioId) => asignar("reemplazoId", usuarioId)}
+          />
         </label>
 
         <label className="flex items-center gap-1.5 text-sm text-text-muted">

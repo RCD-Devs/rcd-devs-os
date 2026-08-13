@@ -1,6 +1,8 @@
 import { PrismaClient, type Prisma } from "../app/generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 
-const prisma = new PrismaClient();
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+const prisma = new PrismaClient({ adapter });
 
 // Roles fijos del roadmap (RCD-OS-Roadmap.md #2) + Director/a (control total,
 // mismo nivel que Lider tecnico). titular_id/reemplazo_id se completan desde
@@ -12,7 +14,13 @@ const ROLES = [
   { nombre: "Desarrollador backend/frontend", esAdmin: false },
   { nombre: "Líder de proyecto/cliente", esAdmin: false },
   { nombre: "Legal", esAdmin: false },
+  { nombre: "Diseño", esAdmin: false },
 ];
+
+// Excepciones a la regla general "todos los roles no-admin pueden crear
+// Protocolos/Proyectos/Clientes": una fila aca bloquea esa combinacion
+// puntual para ese rol. Ver comentario en el modelo RolPermiso.
+const PERMISOS_BLOQUEADOS = [{ rolNombre: "Diseño", recurso: "protocolos", accion: "crear" }];
 
 // Las 8 etapas oficiales del ciclo de vida (roadmap #1). Catalogo fijo, no hay
 // UI para agregar/editar etapas en el spec de Protocolos.
@@ -356,6 +364,21 @@ async function seedRoles() {
   }
 }
 
+async function seedPermisosBloqueados() {
+  for (const permiso of PERMISOS_BLOQUEADOS) {
+    const rol = await prisma.rol.findUnique({ where: { nombre: permiso.rolNombre } });
+    if (!rol) continue;
+
+    await prisma.rolPermiso.upsert({
+      where: {
+        rolId_recurso_accion: { rolId: rol.id, recurso: permiso.recurso, accion: permiso.accion },
+      },
+      update: {},
+      create: { rolId: rol.id, recurso: permiso.recurso, accion: permiso.accion },
+    });
+  }
+}
+
 async function seedEtapas() {
   for (const etapa of ETAPAS) {
     await prisma.etapa.upsert({
@@ -440,6 +463,7 @@ async function seedProtocolos() {
 
 async function main() {
   await seedRoles();
+  await seedPermisosBloqueados();
   await seedEtapas();
   await seedProtocolos();
 }

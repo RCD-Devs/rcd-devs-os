@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { crearProyecto } from "./actions";
@@ -40,9 +41,9 @@ export function NuevoProyectoForm({
     return (
       <p className="text-sm text-text-muted">
         Primero crea un cliente en{" "}
-        <a href="/clientes" className="text-accent underline">
+        <Link href="/clientes" className="text-accent underline">
           Clientes
-        </a>
+        </Link>
         .
       </p>
     );

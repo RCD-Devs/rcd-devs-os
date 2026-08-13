@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { EtapaSelector } from "./EtapaSelector";
 import { IniciarProtocoloButton } from "./IniciarProtocoloButton";
+import { EliminarProyectoButton } from "./EliminarProyectoButton";
 import { Card } from "@/components/ui/Card";
 import { EstadoBadge } from "@/components/ui/Badge";
 import { ProgressBar } from "@/components/ui/ProgressBar";
@@ -11,6 +12,8 @@ import { SemaforoDot } from "@/components/ui/SemaforoDot";
 import { contarProgreso } from "@/lib/protocolos/estados";
 import { calcularSemaforo, SEMAFORO_LABEL } from "@/lib/proyectos/semaforo";
 import { slugConId } from "@/lib/slug";
+import { getCurrentUser } from "@/lib/auth/getCurrentUser";
+import { esAdmin } from "@/lib/auth/esAdmin";
 
 export default async function ProyectoPage({
   params,
@@ -44,9 +47,10 @@ export default async function ProyectoPage({
     notFound();
   }
 
-  const [etapas, protocolos] = await Promise.all([
+  const [etapas, protocolos, usuario] = await Promise.all([
     prisma.etapa.findMany({ orderBy: { orden: "asc" } }),
     prisma.protocolo.findMany({ orderBy: { nombre: "asc" } }),
+    getCurrentUser(),
   ]);
 
   const semaforo = calcularSemaforo(proyecto);
@@ -118,6 +122,12 @@ export default async function ProyectoPage({
           );
         })}
       </ul>
+
+      {esAdmin(usuario) && (
+        <div className="mt-10 border-t border-border pt-6">
+          <EliminarProyectoButton proyectoId={proyecto.id} />
+        </div>
+      )}
     </div>
   );
 }

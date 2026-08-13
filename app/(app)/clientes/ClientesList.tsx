@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Building2, FolderKanban, Search } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
@@ -46,16 +47,18 @@ export function ClientesList({ clientes }: { clientes: Cliente[] }) {
         <ul className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtrados.map((cliente) => (
             <li key={cliente.id}>
-              <Card className="flex items-center gap-3">
-                <Avatar nombre={cliente.nombre} size={36} />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium">{cliente.nombre}</p>
-                  <p className="flex items-center gap-1 text-xs text-text-muted">
-                    <FolderKanban size={12} strokeWidth={2} />
-                    {cliente._count.proyectos} proyecto{cliente._count.proyectos === 1 ? "" : "s"}
-                  </p>
-                </div>
-              </Card>
+              <Link href={`/clientes/${cliente.id}`}>
+                <Card className="flex items-center gap-3 transition-colors hover:border-accent">
+                  <Avatar nombre={cliente.nombre} size={36} />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-medium">{cliente.nombre}</p>
+                    <p className="flex items-center gap-1 text-xs text-text-muted">
+                      <FolderKanban size={12} strokeWidth={2} />
+                      {cliente._count.proyectos} proyecto{cliente._count.proyectos === 1 ? "" : "s"}
+                    </p>
+                  </div>
+                </Card>
+              </Link>
             </li>
           ))}
         </ul>

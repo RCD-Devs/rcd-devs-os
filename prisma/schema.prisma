@@ -54,17 +54,43 @@ model Rol {
   /// despues desde /roles por cualquier admin existente.
   esAdmin     Boolean @default(false) @map("es_admin")
 
-  titular     Usuario?    @relation("RolTitular", fields: [titularId], references: [id])
-  reemplazo   Usuario?    @relation("RolReemplazo", fields: [reemplazoId], references: [id])
-  usuarios    Usuario[]   @relation("UsuarioRol")
-  solicitudes Solicitud[]
+  titular            Usuario?     @relation("RolTitular", fields: [titularId], references: [id])
+  reemplazo          Usuario?     @relation("RolReemplazo", fields: [reemplazoId], references: [id])
+  usuarios           Usuario[]    @relation("UsuarioRol")
+  solicitudes        Solicitud[]
+  permisosBloqueados RolPermiso[]
 
   @@map("Rol")
 }
 
+/// Matriz de permisos por rol, como lista de EXCEPCIONES (no de permisos):
+/// una fila presente significa "este rol NO puede hacer esta accion sobre
+/// este recurso". Sin fila = permitido. Los roles admin (Rol.esAdmin) nunca
+/// se filtran contra esta tabla, siempre tienen control total. Elegido asi
+/// (deny-list) en vez de una lista de permisos otorgados porque el pedido
+/// real fue "todos pueden X excepto el rol Y" — una sola fila por excepcion,
+/// en vez de tener que otorgar el permiso a cada rol existente uno por uno.
+model RolPermiso {
+  id      String @id @default(uuid()) @db.Uuid
+  rolId   String @map("rol_id") @db.Uuid
+  recurso String // "protocolos" | "proyectos" | "clientes" | "solicitudes"
+  accion  String // "crear" (accion "eliminar" no vive aca: eliminar es siempre admin-only)
+
+  rol Rol @relation(fields: [rolId], references: [id])
+
+  @@unique([rolId, recurso, accion])
+  @@map("RolPermiso")
+}
+
 model Cliente {
-  id     String @id @default(uuid()) @db.Uuid
-  nombre String
+  id               String  @id @default(uuid()) @db.Uuid
+  nombre           String
+  contactoNombre   String? @map("contacto_nombre")
+  contactoEmail    String? @map("contacto_email")
+  contactoTelefono String? @map("contacto_telefono")
+  rubro            String?
+  sitioWeb         String? @map("sitio_web")
+  notas            String?
 
   proyectos Proyecto[]
 

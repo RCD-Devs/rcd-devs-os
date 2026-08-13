@@ -2,9 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
 import { Prisma } from "@/app/generated/prisma/client";
 import { registrarEvento } from "@/lib/auditoria";
+import { getCurrentUser } from "@/lib/auth/getCurrentUser";
+import { puedeCrear } from "@/lib/auth/permisos";
 
 // Estados fijos del constructor simple: mismo set que "Elementos basicos de
 // sitio web". No hay UI para definir estados personalizados en este pase
@@ -17,13 +18,13 @@ export async function crearProtocolo(input: {
   alcance: string;
   pasos: string[];
 }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const usuario = await getCurrentUser();
 
-  if (!user) {
+  if (!usuario) {
     throw new Error("No autenticado");
+  }
+  if (!(await puedeCrear(usuario, "protocolos"))) {
+    throw new Error("Tu rol no tiene permiso para crear protocolos");
   }
 
   const nombre = input.nombre.trim();
@@ -65,7 +66,7 @@ export async function crearProtocolo(input: {
   await registrarEvento({
     entidad: "Protocolo",
     entidadId: protocolo.id,
-    usuarioId: user.id,
+    usuarioId: usuario.id,
     accion: "creado",
     detalle: { nombre: protocolo.nombre, pasos: pasos.length },
   });

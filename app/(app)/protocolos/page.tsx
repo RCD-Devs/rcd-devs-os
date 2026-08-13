@@ -3,12 +3,17 @@ import { Plus } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/Button";
 import { ProtocolosList } from "./ProtocolosList";
+import { getCurrentUser } from "@/lib/auth/getCurrentUser";
+import { puedeCrear } from "@/lib/auth/permisos";
 
 // Ruta protegida por proxy.ts: nunca debe quedar cacheada estaticamente, y
 // ademas depende de datos reales de Supabase que no existen en build time.
 export const dynamic = "force-dynamic";
 
 export default async function ProtocolosPage() {
+  const usuario = await getCurrentUser();
+  const puedeCrearProtocolos = await puedeCrear(usuario, "protocolos");
+
   const [protocolos, ejecuciones] = await Promise.all([
     prisma.protocolo.findMany({
       orderBy: { nombre: "asc" },
@@ -53,12 +58,14 @@ export default async function ProtocolosPage() {
     <div>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight text-text">Protocolos</h1>
-        <Link href="/protocolos/nuevo">
-          <Button variant="primary">
-            <Plus size={16} strokeWidth={2} />
-            Nuevo protocolo
-          </Button>
-        </Link>
+        {puedeCrearProtocolos && (
+          <Link href="/protocolos/nuevo">
+            <Button variant="primary">
+              <Plus size={16} strokeWidth={2} />
+              Nuevo protocolo
+            </Button>
+          </Link>
+        )}
       </div>
 
       <ProtocolosList protocolos={resumenes} />

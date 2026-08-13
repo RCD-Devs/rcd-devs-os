@@ -20,6 +20,9 @@ Documento vivo: nació como lista de propuestas y ahora refleja lo que ya se imp
 - **Semáforo verde/amarillo/rojo** (`lib/proyectos/semaforo.ts`) — reglas propias, **sin JIRA**: se calcula a partir de `fechaCompromiso` del proyecto y `fechaLimite` de cada ejecución de protocolo activa.
 - **UI de Roles** (`/roles`) — asignar titular/reemplazo y alternar acceso admin por rol.
 - **Sistema de permisos por rol** (`Rol.esAdmin`) — Líder técnico y Director/a con control total (incluye `/roles` y `/usuarios`); el resto de los roles con CRUD completo sobre lo operativo (Protocolos, Proyectos, Clientes, Solicitudes) pero sin ver la configuración de permisos. Guard server-side en página y en cada server action, no solo ocultar el link.
+- **Matriz de permisos granular** (`RolPermiso`) — lista de excepciones por rol/recurso/acción (ej. el rol "Diseño" no puede crear protocolos, aunque el resto de los roles no-admin sí). Eliminar Clientes/Proyectos quedó admin-only parejo para todos los roles (no había ningún "eliminar" en la app hasta ahora).
+- **Rol "Diseño"** agregado al catálogo, con esa restricción de ejemplo ya sembrada.
+- **Cliente con más datos** — contacto (nombre/email/teléfono), rubro, sitio web y notas internas; página de detalle/edición en `/clientes/[id]`.
 - **Sección Perfil** (`/perfil`) — editar el propio nombre; el saludo del dashboard usa el nombre en vez de caer al correo.
 - **Vista de Usuarios** (`/usuarios`, admin-only) — lista de cuentas con su rol, reasignación de rol por usuario. El formulario de invitación queda condicionado a que exista `SUPABASE_SERVICE_ROLE_KEY` en el entorno (ver pendientes).
 - **Entidad `Solicitud`** (`/solicitudes`) — flujo interno formulario → rol responsable → estado, sin integración a JIRA.

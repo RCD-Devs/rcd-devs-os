@@ -1,9 +1,12 @@
 "use client";
 
-import { useTransition } from "react";
-import { actualizarEstadoSolicitud, ESTADOS_SOLICITUD } from "./actions";
+import { useState, useTransition } from "react";
+import { MessageSquare } from "lucide-react";
+import { actualizarEstadoSolicitud, agregarComentarioSolicitud, ESTADOS_SOLICITUD } from "./actions";
 import { Card } from "@/components/ui/Card";
 import { Select } from "@/components/ui/Select";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
 
 const BADGE_POR_ESTADO: Record<string, string> = {
@@ -25,10 +28,35 @@ export function SolicitudRow({
     proyecto: { nombre: string };
     responsableRol: { nombre: string };
     solicitante: { nombre: string | null; email: string };
+    comentarios: Array<{
+      id: string;
+      texto: string;
+      createdAt: Date;
+      autor: { nombre: string | null; email: string };
+    }>;
   };
 }) {
   const [isPending, startTransition] = useTransition();
   const { showToast } = useToast();
+  const [expandido, setExpandido] = useState(false);
+  const [nuevoComentario, setNuevoComentario] = useState("");
+  const [enviandoComentario, setEnviandoComentario] = useState(false);
+
+  function enviarComentario() {
+    const texto = nuevoComentario.trim();
+    if (!texto) return;
+
+    setEnviandoComentario(true);
+    startTransition(async () => {
+      const result = await agregarComentarioSolicitud(solicitud.id, texto);
+      setEnviandoComentario(false);
+      if (!result.ok) {
+        showToast(result.error, "error");
+      } else {
+        setNuevoComentario("");
+      }
+    });
+  }
 
   return (
     <Card>
@@ -77,6 +105,59 @@ export function SolicitudRow({
           </Select>
         </div>
       </div>
+
+      <button
+        type="button"
+        onClick={() => setExpandido((v) => !v)}
+        className="mt-3 flex items-center gap-1.5 text-xs text-text-muted hover:text-text"
+      >
+        <MessageSquare size={13} strokeWidth={2} />
+        Comentarios{solicitud.comentarios.length > 0 ? ` (${solicitud.comentarios.length})` : ""}
+      </button>
+
+      {expandido && (
+        <div className="mt-2 border-t border-border pt-3">
+          {solicitud.comentarios.length > 0 && (
+            <ul className="space-y-2">
+              {solicitud.comentarios.map((comentario) => (
+                <li key={comentario.id} className="text-sm">
+                  <span className="font-medium">
+                    {comentario.autor.nombre ?? comentario.autor.email}
+                  </span>{" "}
+                  <span className="font-mono text-xs text-text-muted">
+                    {new Date(comentario.createdAt).toLocaleString("es-CL")}
+                  </span>
+                  <p className="text-text-muted">{comentario.texto}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <div className="mt-2 flex items-center gap-2">
+            <Input
+              type="text"
+              placeholder="Agregar un comentario..."
+              value={nuevoComentario}
+              disabled={enviandoComentario}
+              onChange={(e) => setNuevoComentario(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  enviarComentario();
+                }
+              }}
+            />
+            <Button
+              type="button"
+              disabled={enviandoComentario || !nuevoComentario.trim()}
+              onClick={enviarComentario}
+              className="shrink-0 px-3 py-2 text-xs"
+            >
+              Enviar
+            </Button>
+          </div>
+        </div>
+      )}
     </Card>
   );
 }

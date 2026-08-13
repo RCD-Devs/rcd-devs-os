@@ -82,3 +82,37 @@ export async function actualizarEstadoSolicitud(
 
   return ok(null);
 }
+
+export async function agregarComentarioSolicitud(
+  solicitudId: string,
+  texto: string,
+): Promise<ActionResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return fail("No autenticado");
+  }
+
+  const textoLimpio = texto.trim();
+  if (!textoLimpio) {
+    return fail("El comentario no puede estar vacio");
+  }
+
+  await prisma.comentarioSolicitud.create({
+    data: { solicitudId, autorId: user.id, texto: textoLimpio },
+  });
+
+  await registrarEvento({
+    entidad: "Solicitud",
+    entidadId: solicitudId,
+    usuarioId: user.id,
+    accion: "comentario_agregado",
+  });
+
+  revalidatePath("/solicitudes");
+
+  return ok(null);
+}

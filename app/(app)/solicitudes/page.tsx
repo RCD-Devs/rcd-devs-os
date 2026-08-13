@@ -11,7 +11,12 @@ export const dynamic = "force-dynamic";
 export default async function SolicitudesPage() {
   const [solicitudes, proyectos, roles] = await Promise.all([
     prisma.solicitud.findMany({
-      include: { proyecto: true, responsableRol: true, solicitante: true },
+      include: {
+        proyecto: true,
+        responsableRol: true,
+        solicitante: true,
+        comentarios: { include: { autor: true }, orderBy: { createdAt: "asc" } },
+      },
       orderBy: { createdAt: "desc" },
     }),
     prisma.proyecto.findMany({ where: { archivado: false }, orderBy: { nombre: "asc" } }),

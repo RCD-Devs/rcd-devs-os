@@ -32,12 +32,13 @@ model Usuario {
   rolId  String? @map("rol_id") @db.Uuid
   rol    Rol?    @relation("UsuarioRol", fields: [rolId], references: [id])
 
-  rolesComoTitular   Rol[]             @relation("RolTitular")
-  rolesComoReemplazo Rol[]             @relation("RolReemplazo")
-  pasosResponsable   EjecucionPaso[]
-  solicitudesCreadas Solicitud[]       @relation("SolicitudSolicitante")
-  eventosAuditoria   EventoAuditoria[]
-  comentarios        Comentario[]
+  rolesComoTitular     Rol[]                 @relation("RolTitular")
+  rolesComoReemplazo   Rol[]                 @relation("RolReemplazo")
+  pasosResponsable     EjecucionPaso[]
+  solicitudesCreadas   Solicitud[]           @relation("SolicitudSolicitante")
+  eventosAuditoria     EventoAuditoria[]
+  comentarios          Comentario[]
+  comentariosSolicitud ComentarioSolicitud[]
 
   @@map("Usuario")
 }
@@ -209,11 +210,28 @@ model Solicitud {
   slaFechaLimite   DateTime? @map("sla_fecha_limite") @db.Date
   createdAt        DateTime  @default(now()) @map("created_at")
 
-  proyecto       Proyecto @relation(fields: [proyectoId], references: [id])
-  solicitante    Usuario  @relation("SolicitudSolicitante", fields: [solicitanteId], references: [id])
-  responsableRol Rol      @relation(fields: [responsableRolId], references: [id])
+  proyecto       Proyecto              @relation(fields: [proyectoId], references: [id])
+  solicitante    Usuario               @relation("SolicitudSolicitante", fields: [solicitanteId], references: [id])
+  responsableRol Rol                   @relation(fields: [responsableRolId], references: [id])
+  comentarios    ComentarioSolicitud[]
 
   @@map("Solicitud")
+}
+
+/// Historial de comentarios por Solicitud (#16 de MEJORAS-PROPUESTAS.md),
+/// mismo criterio que Comentario (por paso de checklist): modelo separado
+/// en vez de una FK polimorfica, para mantener el join simple y tipado.
+model ComentarioSolicitud {
+  id          String   @id @default(uuid()) @db.Uuid
+  solicitudId String   @map("solicitud_id") @db.Uuid
+  autorId     String   @map("autor_id") @db.Uuid
+  texto       String
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  solicitud Solicitud @relation(fields: [solicitudId], references: [id])
+  autor     Usuario   @relation(fields: [autorId], references: [id])
+
+  @@map("ComentarioSolicitud")
 }
 
 /// Append-only (roadmap #6): nunca se borra ni edita una fila desde la app.

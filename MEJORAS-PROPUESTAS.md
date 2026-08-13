@@ -101,7 +101,7 @@ Se va tildando a medida que se implementa.
 - [x] #29 Suspense granular en `/alertas`
 - [x] #35 Exportar el dashboard completo a PDF
 - [x] #32 Dashboard de cumplimiento por cliente
-- [ ] #16 Comentarios en Solicitudes (modelo nuevo)
+- [x] #16 Comentarios en Solicitudes (modelo nuevo)
 - [ ] #11 Adjuntar múltiples archivos por paso (modelo nuevo)
 - [ ] #14 Timeline de proyecto
 - [ ] #17 Picker de usuario con búsqueda
@@ -143,7 +143,7 @@ Propuestas propias, agrupadas por área. Ninguna depende de JIRA. El check indic
 13. **Plantillas de proyecto** — crear un proyecto que ya arranque con ciertos protocolos pre-iniciados según el tipo de proyecto (ej. todo proyecto WordPress arranca con "Seguridad WordPress" en curso).
 14. **Timeline de proyecto** — vista dedicada de cambios de etapa a lo largo del tiempo (hoy ese historial existe en `EventoAuditoria` pero no hay una vista que lo muestre agrupado por proyecto).
 15. ✅ **Archivar proyectos completados** — columna `Proyecto.archivado` (migración `20260813160000_add_proyecto_archivado`); toggle "Archivar"/"Desarchivar" en el detalle del proyecto. Excluido por defecto de `/proyectos` (con tab "Activos/Archivados"), `/dashboard`, `/alertas` y del selector de proyecto al crear una Solicitud.
-16. **Comentarios en Solicitudes** — hoy los comentarios con autor/fecha solo existen en pasos de checklist, no en solicitudes.
+16. ✅ **Comentarios en Solicitudes** — modelo `ComentarioSolicitud` nuevo (migración `20260813170000_add_comentario_solicitud`, mismo criterio de RLS que `Comentario`), sección expandible en cada `SolicitudRow` igual al patrón ya usado en pasos de checklist.
 17. **Picker de usuario con búsqueda** — el selector de titular/reemplazo en `/roles` y el de responsable en `/usuarios` son `<select>` simples; con más usuarios conviene un combobox con búsqueda.
 
 ### Calidad y mantenibilidad

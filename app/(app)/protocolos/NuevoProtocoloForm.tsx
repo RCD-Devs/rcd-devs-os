@@ -45,12 +45,12 @@ export function NuevoProtocoloForm() {
     setLoading(true);
     setError(null);
 
-    try {
-      const protocolo = await crearProtocolo({ nombre, objetivo, alcance, pasos });
-      router.push(`/protocolos/${slugify(protocolo.nombre)}`);
-    } catch (err) {
+    const result = await crearProtocolo({ nombre, objetivo, alcance, pasos });
+    if (!result.ok) {
       setLoading(false);
-      setError(err instanceof Error ? err.message : "No se pudo crear el protocolo");
+      setError(result.error);
+    } else {
+      router.push(`/protocolos/${slugify(result.data.nombre)}`);
     }
   }
 

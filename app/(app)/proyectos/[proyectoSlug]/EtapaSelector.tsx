@@ -26,11 +26,11 @@ export function EtapaSelector({
       onChange={(e) => {
         const etapaId = e.target.value;
         startTransition(async () => {
-          try {
-            await actualizarEtapaProyecto(proyectoId, etapaId, proyectoSlug);
+          const result = await actualizarEtapaProyecto(proyectoId, etapaId, proyectoSlug);
+          if (!result.ok) {
+            showToast(result.error, "error");
+          } else {
             showToast("Etapa actualizada");
-          } catch (err) {
-            showToast(err instanceof Error ? err.message : "No se pudo actualizar la etapa", "error");
           }
         });
       }}

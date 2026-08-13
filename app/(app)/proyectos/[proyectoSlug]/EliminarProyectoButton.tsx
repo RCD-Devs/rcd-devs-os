@@ -14,12 +14,12 @@ export function EliminarProyectoButton({ proyectoId }: { proyectoId: string }) {
       label="Eliminar proyecto"
       confirmLabel="¿Eliminar este proyecto? No se puede deshacer."
       onConfirm={async () => {
-        try {
-          await eliminarProyecto(proyectoId);
+        const result = await eliminarProyecto(proyectoId);
+        if (!result.ok) {
+          showToast(result.error, "error");
+        } else {
           showToast("Proyecto eliminado");
           router.push("/proyectos");
-        } catch (err) {
-          showToast(err instanceof Error ? err.message : "No se pudo eliminar", "error");
         }
       }}
     />

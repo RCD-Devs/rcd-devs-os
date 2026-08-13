@@ -60,11 +60,11 @@ export function SolicitudRow({
             onChange={(e) => {
               const estado = e.target.value;
               startTransition(async () => {
-                try {
-                  await actualizarEstadoSolicitud(solicitud.id, estado);
+                const result = await actualizarEstadoSolicitud(solicitud.id, estado);
+                if (!result.ok) {
+                  showToast(result.error, "error");
+                } else {
                   showToast("Estado actualizado");
-                } catch (err) {
-                  showToast(err instanceof Error ? err.message : "No se pudo actualizar", "error");
                 }
               });
             }}

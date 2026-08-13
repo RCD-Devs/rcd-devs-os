@@ -4,20 +4,21 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { registrarEvento } from "@/lib/auditoria";
+import { ok, fail, type ActionResult } from "@/lib/actionResult";
 
-export async function actualizarPerfil(nombre: string) {
+export async function actualizarPerfil(nombre: string): Promise<ActionResult> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("No autenticado");
+    return fail("No autenticado");
   }
 
   const nombreLimpio = nombre.trim();
   if (!nombreLimpio) {
-    throw new Error("El nombre no puede estar vacio");
+    return fail("El nombre no puede estar vacio");
   }
 
   // Siempre sobre el usuario de la sesion actual (user.id), nunca un id que
@@ -37,4 +38,6 @@ export async function actualizarPerfil(nombre: string) {
 
   revalidatePath("/perfil");
   revalidatePath("/dashboard");
+
+  return ok(null);
 }

@@ -6,6 +6,7 @@ import { Prisma } from "@/app/generated/prisma/client";
 import { registrarEvento } from "@/lib/auditoria";
 import { getCurrentUser } from "@/lib/auth/getCurrentUser";
 import { puedeCrear } from "@/lib/auth/permisos";
+import { ok, fail, type ActionResult } from "@/lib/actionResult";
 
 // Estados fijos del constructor simple: mismo set que "Elementos basicos de
 // sitio web". No hay UI para definir estados personalizados en este pase
@@ -17,25 +18,25 @@ export async function crearProtocolo(input: {
   objetivo: string;
   alcance: string;
   pasos: string[];
-}) {
+}): Promise<ActionResult<{ id: string; nombre: string }>> {
   const usuario = await getCurrentUser();
 
   if (!usuario) {
-    throw new Error("No autenticado");
+    return fail("No autenticado");
   }
   if (!(await puedeCrear(usuario, "protocolos"))) {
-    throw new Error("Tu rol no tiene permiso para crear protocolos");
+    return fail("Tu rol no tiene permiso para crear protocolos");
   }
 
   const nombre = input.nombre.trim();
   const pasos = input.pasos.map((p) => p.trim()).filter(Boolean);
 
   if (!nombre || !input.objetivo.trim()) {
-    throw new Error("Nombre y objetivo son requeridos");
+    return fail("Nombre y objetivo son requeridos");
   }
 
   if (pasos.length === 0) {
-    throw new Error("Agrega al menos un paso al checklist");
+    return fail("Agrega al menos un paso al checklist");
   }
 
   let protocolo;
@@ -58,7 +59,7 @@ export async function crearProtocolo(input: {
     });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-      throw new Error("Ya existe un protocolo con ese nombre");
+      return fail("Ya existe un protocolo con ese nombre");
     }
     throw error;
   }
@@ -73,5 +74,5 @@ export async function crearProtocolo(input: {
 
   revalidatePath("/protocolos");
 
-  return protocolo;
+  return ok({ id: protocolo.id, nombre: protocolo.nombre });
 }

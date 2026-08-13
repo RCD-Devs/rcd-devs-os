@@ -25,17 +25,16 @@ export function InvitarUsuarioForm({ roles }: { roles: Array<{ id: string; nombr
     setLoading(true);
     setError(null);
 
-    try {
-      await crearUsuario(email, password, rolId);
+    const result = await crearUsuario(email, password, rolId);
+    if (!result.ok) {
+      setError(result.error);
+    } else {
       showToast(`Cuenta creada. Contraseña: ${password}`);
       setEmail("");
       setPassword(generarPasswordTemporal());
       router.refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "No se pudo crear el usuario");
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   }
 
   function copiarPassword() {

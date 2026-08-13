@@ -51,14 +51,14 @@ export function EditarProtocoloForm({
     setLoading(true);
     setError(null);
 
-    try {
-      await crearNuevaVersionProtocolo(protocoloId, pasos);
+    const result = await crearNuevaVersionProtocolo(protocoloId, pasos);
+    if (!result.ok) {
+      setError(result.error);
+      setLoading(false);
+    } else {
       showToast(`Version v${numeroVersionVigente + 1} publicada`);
       router.push(`/protocolos/${protocoloSlug}`);
       router.refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "No se pudo publicar la nueva version");
-      setLoading(false);
     }
   }
 

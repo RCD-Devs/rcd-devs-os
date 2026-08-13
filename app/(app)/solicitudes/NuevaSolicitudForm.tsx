@@ -31,18 +31,23 @@ export function NuevaSolicitudForm({
     setLoading(true);
     setError(null);
 
-    try {
-      await crearSolicitud({ proyectoId, tipo, descripcion, responsableRolId, slaFechaLimite });
+    const result = await crearSolicitud({
+      proyectoId,
+      tipo,
+      descripcion,
+      responsableRolId,
+      slaFechaLimite,
+    });
+    if (!result.ok) {
+      setError(result.error);
+    } else {
       setTipo("");
       setDescripcion("");
       setSlaFechaLimite("");
       showToast("Solicitud creada");
       router.refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "No se pudo crear la solicitud");
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   }
 
   if (proyectos.length === 0 || roles.length === 0) {

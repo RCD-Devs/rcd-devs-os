@@ -5,26 +5,30 @@ import { prisma } from "@/lib/prisma";
 import { registrarEvento } from "@/lib/auditoria";
 import { getCurrentUser } from "@/lib/auth/getCurrentUser";
 import { esAdmin } from "@/lib/auth/esAdmin";
+import { ok, fail, type ActionResult } from "@/lib/actionResult";
 
-async function requireAdmin() {
+async function requireAdmin(): Promise<
+  ActionResult<NonNullable<Awaited<ReturnType<typeof getCurrentUser>>>>
+> {
   const usuario = await getCurrentUser();
 
   if (!usuario) {
-    throw new Error("No autenticado");
+    return fail("No autenticado");
   }
   if (!esAdmin(usuario)) {
-    throw new Error("No autorizado: se requiere rol con acceso admin");
+    return fail("No autorizado: se requiere rol con acceso admin");
   }
 
-  return usuario;
+  return ok(usuario);
 }
 
 export async function actualizarAsignacionRol(
   rolId: string,
   campo: "titularId" | "reemplazoId",
   usuarioId: string | null,
-) {
-  const usuario = await requireAdmin();
+): Promise<ActionResult> {
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth;
 
   await prisma.rol.update({
     where: { id: rolId },
@@ -34,26 +38,31 @@ export async function actualizarAsignacionRol(
   await registrarEvento({
     entidad: "Rol",
     entidadId: rolId,
-    usuarioId: usuario.id,
+    usuarioId: auth.data.id,
     accion: "asignacion_actualizada",
     detalle: { campo, usuarioId },
   });
 
   revalidatePath("/roles");
+
+  return ok(null);
 }
 
-export async function actualizarEsAdminRol(rolId: string, valor: boolean) {
-  const usuario = await requireAdmin();
+export async function actualizarEsAdminRol(rolId: string, valor: boolean): Promise<ActionResult> {
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth;
 
   await prisma.rol.update({ where: { id: rolId }, data: { esAdmin: valor } });
 
   await registrarEvento({
     entidad: "Rol",
     entidadId: rolId,
-    usuarioId: usuario.id,
+    usuarioId: auth.data.id,
     accion: "permiso_admin_actualizado",
     detalle: { esAdmin: valor },
   });
 
   revalidatePath("/roles");
+
+  return ok(null);
 }

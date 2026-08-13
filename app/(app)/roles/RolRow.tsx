@@ -28,11 +28,11 @@ export function RolRow({
 
   function asignar(campo: "titularId" | "reemplazoId", usuarioId: string) {
     startTransition(async () => {
-      try {
-        await actualizarAsignacionRol(rol.id, campo, usuarioId || null);
+      const result = await actualizarAsignacionRol(rol.id, campo, usuarioId || null);
+      if (!result.ok) {
+        showToast(result.error, "error");
+      } else {
         showToast("Asignacion guardada");
-      } catch (err) {
-        showToast(err instanceof Error ? err.message : "No se pudo guardar", "error");
       }
     });
   }
@@ -41,12 +41,12 @@ export function RolRow({
     const nuevoValor = !esAdminLocal;
     setEsAdminLocal(nuevoValor);
     startTransition(async () => {
-      try {
-        await actualizarEsAdminRol(rol.id, nuevoValor);
-        showToast(nuevoValor ? "Acceso admin activado" : "Acceso admin desactivado");
-      } catch (err) {
+      const result = await actualizarEsAdminRol(rol.id, nuevoValor);
+      if (!result.ok) {
         setEsAdminLocal(!nuevoValor);
-        showToast(err instanceof Error ? err.message : "No se pudo guardar", "error");
+        showToast(result.error, "error");
+      } else {
+        showToast(nuevoValor ? "Acceso admin activado" : "Acceso admin desactivado");
       }
     });
   }

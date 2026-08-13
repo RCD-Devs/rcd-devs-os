@@ -32,22 +32,21 @@ export function NuevoClienteForm() {
     setLoading(true);
     setError(null);
 
-    try {
-      await crearCliente({
-        nombre,
-        contactoNombre,
-        contactoEmail,
-        contactoTelefono,
-        rubro,
-        sitioWeb,
-        notas,
-      });
+    const result = await crearCliente({
+      nombre,
+      contactoNombre,
+      contactoEmail,
+      contactoTelefono,
+      rubro,
+      sitioWeb,
+      notas,
+    });
+    if (!result.ok) {
+      setError(result.error);
+    } else {
       limpiar();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "No se pudo crear el cliente");
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   }
 
   return (

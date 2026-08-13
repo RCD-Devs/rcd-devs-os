@@ -7,19 +7,20 @@ import { Prisma } from "@/app/generated/prisma/client";
 import { registrarEvento } from "@/lib/auditoria";
 import { getCurrentUser } from "@/lib/auth/getCurrentUser";
 import { esAdmin } from "@/lib/auth/esAdmin";
+import { ok, fail, type ActionResult } from "@/lib/actionResult";
 
 export async function actualizarEtapaProyecto(
   proyectoId: string,
   etapaId: string,
   proyectoSlug: string,
-) {
+): Promise<ActionResult> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("No autenticado");
+    return fail("No autenticado");
   }
 
   const proyectoAnterior = await prisma.proyecto.findUnique({
@@ -43,23 +44,25 @@ export async function actualizarEtapaProyecto(
   // El slug de la URL depende del nombre del proyecto (no de la etapa), asi
   // que revalidar con el id crudo apuntaria a una ruta que ya no existe.
   revalidatePath(`/proyectos/${proyectoSlug}`);
+
+  return ok(null);
 }
 
-export async function eliminarProyecto(proyectoId: string) {
+export async function eliminarProyecto(proyectoId: string): Promise<ActionResult> {
   const usuario = await getCurrentUser();
 
   if (!usuario) {
-    throw new Error("No autenticado");
+    return fail("No autenticado");
   }
   if (!esAdmin(usuario)) {
-    throw new Error("No autorizado: se requiere rol con acceso admin");
+    return fail("No autorizado: se requiere rol con acceso admin");
   }
 
   try {
     await prisma.proyecto.delete({ where: { id: proyectoId } });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2003") {
-      throw new Error(
+      return fail(
         "No se puede eliminar: el proyecto tiene ejecuciones de protocolo o solicitudes asociadas",
       );
     }
@@ -74,4 +77,6 @@ export async function eliminarProyecto(proyectoId: string) {
   });
 
   revalidatePath("/proyectos");
+
+  return ok(null);
 }

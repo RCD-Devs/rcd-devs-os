@@ -28,12 +28,12 @@ export function NuevoProyectoForm({
     setLoading(true);
     setError(null);
 
-    try {
-      const proyecto = await crearProyecto({ nombre, clienteId, etapaActualId });
-      router.push(`/proyectos/${slugConId(proyecto.nombre, proyecto.id)}`);
-    } catch (err) {
+    const result = await crearProyecto({ nombre, clienteId, etapaActualId });
+    if (!result.ok) {
       setLoading(false);
-      setError(err instanceof Error ? err.message : "No se pudo crear el proyecto");
+      setError(result.error);
+    } else {
+      router.push(`/proyectos/${slugConId(result.data.nombre, result.data.id)}`);
     }
   }
 

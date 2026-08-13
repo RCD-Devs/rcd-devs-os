@@ -35,22 +35,21 @@ export function EditarClienteForm({ cliente }: { cliente: ClienteData }) {
     setLoading(true);
     setError(null);
 
-    try {
-      await actualizarCliente(cliente.id, {
-        nombre,
-        contactoNombre,
-        contactoEmail,
-        contactoTelefono,
-        rubro,
-        sitioWeb,
-        notas,
-      });
+    const result = await actualizarCliente(cliente.id, {
+      nombre,
+      contactoNombre,
+      contactoEmail,
+      contactoTelefono,
+      rubro,
+      sitioWeb,
+      notas,
+    });
+    if (!result.ok) {
+      setError(result.error);
+    } else {
       showToast("Cliente actualizado");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "No se pudo guardar");
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   }
 
   return (

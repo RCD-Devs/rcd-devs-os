@@ -14,12 +14,12 @@ export function EliminarClienteButton({ clienteId }: { clienteId: string }) {
       label="Eliminar cliente"
       confirmLabel="¿Eliminar este cliente? No se puede deshacer."
       onConfirm={async () => {
-        try {
-          await eliminarCliente(clienteId);
+        const result = await eliminarCliente(clienteId);
+        if (!result.ok) {
+          showToast(result.error, "error");
+        } else {
           showToast("Cliente eliminado");
           router.push("/clientes");
-        } catch (err) {
-          showToast(err instanceof Error ? err.message : "No se pudo eliminar", "error");
         }
       }}
     />

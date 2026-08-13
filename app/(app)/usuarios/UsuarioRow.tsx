@@ -38,12 +38,12 @@ export function UsuarioRow({
       return;
     }
     startTransition(async () => {
-      try {
-        await actualizarEmailUsuario(usuario.id, correo);
+      const result = await actualizarEmailUsuario(usuario.id, correo);
+      if (!result.ok) {
+        showToast(result.error, "error");
+      } else {
         showToast("Correo actualizado");
         setEditandoEmail(false);
-      } catch (err) {
-        showToast(err instanceof Error ? err.message : "No se pudo actualizar el correo", "error");
       }
     });
   }
@@ -51,11 +51,11 @@ export function UsuarioRow({
   function restablecerPassword() {
     const nueva = generarPasswordTemporal();
     startTransition(async () => {
-      try {
-        await restablecerPasswordUsuario(usuario.id, nueva);
+      const result = await restablecerPasswordUsuario(usuario.id, nueva);
+      if (!result.ok) {
+        showToast(result.error, "error");
+      } else {
         showToast(`Contraseña restablecida: ${nueva}`);
-      } catch (err) {
-        showToast(err instanceof Error ? err.message : "No se pudo restablecer", "error");
       }
     });
   }
@@ -112,11 +112,11 @@ export function UsuarioRow({
           onChange={(e) => {
             const rolId = e.target.value;
             startTransition(async () => {
-              try {
-                await actualizarRolUsuario(usuario.id, rolId);
+              const result = await actualizarRolUsuario(usuario.id, rolId);
+              if (!result.ok) {
+                showToast(result.error, "error");
+              } else {
                 showToast("Rol actualizado");
-              } catch (err) {
-                showToast(err instanceof Error ? err.message : "No se pudo guardar", "error");
               }
             });
           }}
@@ -143,11 +143,11 @@ export function UsuarioRow({
             label="Eliminar"
             confirmLabel="¿Eliminar esta cuenta? No se puede deshacer."
             onConfirm={async () => {
-              try {
-                await eliminarUsuario(usuario.id);
+              const result = await eliminarUsuario(usuario.id);
+              if (!result.ok) {
+                showToast(result.error, "error");
+              } else {
                 showToast("Usuario eliminado");
-              } catch (err) {
-                showToast(err instanceof Error ? err.message : "No se pudo eliminar", "error");
               }
             }}
           />

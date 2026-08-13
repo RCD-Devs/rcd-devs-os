@@ -6,36 +6,43 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { registrarEvento } from "@/lib/auditoria";
 import { getCurrentUser } from "@/lib/auth/getCurrentUser";
 import { esAdmin } from "@/lib/auth/esAdmin";
+import { ok, fail, type ActionResult } from "@/lib/actionResult";
 
-async function requireAdmin() {
+async function requireAdmin(): Promise<
+  ActionResult<NonNullable<Awaited<ReturnType<typeof getCurrentUser>>>>
+> {
   const usuario = await getCurrentUser();
 
   if (!usuario) {
-    throw new Error("No autenticado");
+    return fail("No autenticado");
   }
   if (!esAdmin(usuario)) {
-    throw new Error("No autorizado: se requiere rol con acceso admin");
+    return fail("No autorizado: se requiere rol con acceso admin");
   }
 
-  return usuario;
+  return ok(usuario);
 }
 
-export async function crearUsuario(email: string, password: string, rolId: string) {
-  const usuarioActual = await requireAdmin();
+export async function crearUsuario(
+  email: string,
+  password: string,
+  rolId: string,
+): Promise<ActionResult> {
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth;
+  const usuarioActual = auth.data;
 
   const adminClient = createAdminClient();
   if (!adminClient) {
-    throw new Error(
-      "Crear usuarios requiere SUPABASE_SERVICE_ROLE_KEY configurada en las variables de entorno",
-    );
+    return fail("Crear usuarios requiere SUPABASE_SERVICE_ROLE_KEY configurada en las variables de entorno");
   }
 
   const correo = email.trim().toLowerCase();
   if (!correo) {
-    throw new Error("El correo es requerido");
+    return fail("El correo es requerido");
   }
   if (password.length < 8) {
-    throw new Error("La contraseña debe tener al menos 8 caracteres");
+    return fail("La contraseña debe tener al menos 8 caracteres");
   }
 
   const { data, error } = await adminClient.auth.admin.createUser({
@@ -44,7 +51,7 @@ export async function crearUsuario(email: string, password: string, rolId: strin
     email_confirm: true,
   });
   if (error) {
-    throw new Error(error.message);
+    return fail(error.message);
   }
 
   // El trigger de Supabase (trigger_usuario_sync) crea la fila espejo en
@@ -66,10 +73,14 @@ export async function crearUsuario(email: string, password: string, rolId: strin
   });
 
   revalidatePath("/usuarios");
+
+  return ok(null);
 }
 
-export async function actualizarRolUsuario(usuarioId: string, rolId: string) {
-  const usuarioActual = await requireAdmin();
+export async function actualizarRolUsuario(usuarioId: string, rolId: string): Promise<ActionResult> {
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth;
+  const usuarioActual = auth.data;
 
   await prisma.usuario.update({
     where: { id: usuarioId },
@@ -85,21 +96,23 @@ export async function actualizarRolUsuario(usuarioId: string, rolId: string) {
   });
 
   revalidatePath("/usuarios");
+
+  return ok(null);
 }
 
-export async function actualizarEmailUsuario(usuarioId: string, email: string) {
-  const usuarioActual = await requireAdmin();
+export async function actualizarEmailUsuario(usuarioId: string, email: string): Promise<ActionResult> {
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth;
+  const usuarioActual = auth.data;
 
   const adminClient = createAdminClient();
   if (!adminClient) {
-    throw new Error(
-      "Editar usuarios requiere SUPABASE_SERVICE_ROLE_KEY configurada en las variables de entorno",
-    );
+    return fail("Editar usuarios requiere SUPABASE_SERVICE_ROLE_KEY configurada en las variables de entorno");
   }
 
   const correo = email.trim().toLowerCase();
   if (!correo) {
-    throw new Error("El correo es requerido");
+    return fail("El correo es requerido");
   }
 
   const { error } = await adminClient.auth.admin.updateUserById(usuarioId, {
@@ -107,7 +120,7 @@ export async function actualizarEmailUsuario(usuarioId: string, email: string) {
     email_confirm: true,
   });
   if (error) {
-    throw new Error(error.message);
+    return fail(error.message);
   }
 
   await prisma.usuario.update({ where: { id: usuarioId }, data: { email: correo } });
@@ -121,25 +134,32 @@ export async function actualizarEmailUsuario(usuarioId: string, email: string) {
   });
 
   revalidatePath("/usuarios");
+
+  return ok(null);
 }
 
-export async function restablecerPasswordUsuario(usuarioId: string, password: string) {
-  const usuarioActual = await requireAdmin();
+export async function restablecerPasswordUsuario(
+  usuarioId: string,
+  password: string,
+): Promise<ActionResult> {
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth;
+  const usuarioActual = auth.data;
 
   const adminClient = createAdminClient();
   if (!adminClient) {
-    throw new Error(
+    return fail(
       "Restablecer contraseñas requiere SUPABASE_SERVICE_ROLE_KEY configurada en las variables de entorno",
     );
   }
 
   if (password.length < 8) {
-    throw new Error("La contraseña debe tener al menos 8 caracteres");
+    return fail("La contraseña debe tener al menos 8 caracteres");
   }
 
   const { error } = await adminClient.auth.admin.updateUserById(usuarioId, { password });
   if (error) {
-    throw new Error(error.message);
+    return fail(error.message);
   }
 
   await registrarEvento({
@@ -150,20 +170,22 @@ export async function restablecerPasswordUsuario(usuarioId: string, password: st
   });
 
   revalidatePath("/usuarios");
+
+  return ok(null);
 }
 
-export async function eliminarUsuario(usuarioId: string) {
-  const usuarioActual = await requireAdmin();
+export async function eliminarUsuario(usuarioId: string): Promise<ActionResult> {
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth;
+  const usuarioActual = auth.data;
 
   if (usuarioId === usuarioActual.id) {
-    throw new Error("No puedes eliminar tu propia cuenta");
+    return fail("No puedes eliminar tu propia cuenta");
   }
 
   const adminClient = createAdminClient();
   if (!adminClient) {
-    throw new Error(
-      "Eliminar usuarios requiere SUPABASE_SERVICE_ROLE_KEY configurada en las variables de entorno",
-    );
+    return fail("Eliminar usuarios requiere SUPABASE_SERVICE_ROLE_KEY configurada en las variables de entorno");
   }
 
   // Borra en auth.users; la fila espejo en public.Usuario cae en cascada
@@ -172,7 +194,7 @@ export async function eliminarUsuario(usuarioId: string) {
   // rechaza el borrado y Supabase lo devuelve como error.
   const { error } = await adminClient.auth.admin.deleteUser(usuarioId);
   if (error) {
-    throw new Error(error.message);
+    return fail(error.message);
   }
 
   await registrarEvento({
@@ -183,4 +205,6 @@ export async function eliminarUsuario(usuarioId: string) {
   });
 
   revalidatePath("/usuarios");
+
+  return ok(null);
 }

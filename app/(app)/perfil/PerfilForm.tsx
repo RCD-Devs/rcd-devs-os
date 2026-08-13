@@ -20,15 +20,14 @@ export function PerfilForm({ nombreInicial }: { nombreInicial: string }) {
     setLoading(true);
     setError(null);
 
-    try {
-      await actualizarPerfil(nombre);
+    const result = await actualizarPerfil(nombre);
+    if (!result.ok) {
+      setError(result.error);
+    } else {
       showToast("Perfil actualizado");
       router.refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "No se pudo guardar el perfil");
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   }
 
   return (

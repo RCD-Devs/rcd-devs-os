@@ -98,7 +98,7 @@ Se va tildando a medida que se implementa.
 - [x] #15 Archivar proyectos completados
 - [x] #1 Paginación en listas largas
 - [x] #21 Rate limiting básico en rutas de API
-- [ ] #29 Suspense granular en `/alertas`
+- [x] #29 Suspense granular en `/alertas`
 - [ ] #35 Exportar el dashboard completo a PDF
 - [ ] #32 Dashboard de cumplimiento por cliente
 - [ ] #16 Comentarios en Solicitudes (modelo nuevo)
@@ -165,7 +165,7 @@ Propuestas propias, agrupadas por área. Ninguna depende de JIRA. El check indic
 ### Performance e infraestructura
 
 28. ✅ **Cachear catálogos que casi no cambian** (Etapas, Roles) — `lib/catalogos.ts` (`unstable_cache`, no la nueva directiva `"use cache"`/Cache Components: es de opt-in global y más riesgo de tocar el resto de las páginas `force-dynamic`). Etapas cachea indefinido (sin mutación en la app); Roles se invalida con `revalidateTag("roles", "max")` desde `/roles/actions.ts` cuando se edita.
-29. **Suspense granular en páginas pesadas** — `/alertas` calcula el semáforo de *todos* los proyectos antes de poder mostrar nada; con `<Suspense>` por sección se podría mostrar el layout de inmediato y las alertas a medida que están listas.
+29. ✅ **Suspense granular en páginas pesadas** — `/alertas` separó Proyectos y Solicitudes en dos componentes servidor con su propia consulta, cada uno en su `<Suspense>`; el título y la descripción aparecen al instante y cada sección se streamea cuando su query termina, en vez de esperar ambas antes de mostrar nada. El `loading.tsx` de la ruta quedó sin uso (la página ya no tiene un `await` a nivel raíz que lo dispare) y se eliminó.
 30. **Habilitar Speed Insights / Web Analytics en Vercel** — estaban deshabilitados durante todo este debugging; sin eso, un problema de latencia real solo se nota cuando alguien se queja, no antes.
 31. **Revisar el tamaño del connection pool de `pg`** (`@prisma/adapter-pg`) para el entorno serverless — hoy usa la configuración por default; vale la pena revisar si conviene un `max` más chico dado que cada función serverless ya pasa por el pooler de Supabase (pgbouncer).
 

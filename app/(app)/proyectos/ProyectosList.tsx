@@ -8,12 +8,15 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Card } from "@/components/ui/Card";
 import { EtapaBadge } from "@/components/ui/EtapaBadge";
 import { Input } from "@/components/ui/Input";
+import { Paginacion } from "@/components/ui/Paginacion";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { SemaforoDot } from "@/components/ui/SemaforoDot";
 import { contarProgreso } from "@/lib/protocolos/estados";
 import { alertaFechaCompromiso } from "@/lib/proyectos/alertaFecha";
 import { calcularSemaforo } from "@/lib/proyectos/semaforo";
 import { slugConId } from "@/lib/slug";
+
+const TAMANO_PAGINA = 20;
 
 type Proyecto = {
   id: string;
@@ -30,6 +33,7 @@ type Proyecto = {
 
 export function ProyectosList({ proyectos }: { proyectos: Proyecto[] }) {
   const [busqueda, setBusqueda] = useState("");
+  const [pagina, setPagina] = useState(1);
 
   const filtrados = useMemo(() => {
     const q = busqueda.trim().toLowerCase();
@@ -38,6 +42,15 @@ export function ProyectosList({ proyectos }: { proyectos: Proyecto[] }) {
       (p) => p.nombre.toLowerCase().includes(q) || p.cliente.nombre.toLowerCase().includes(q),
     );
   }, [proyectos, busqueda]);
+
+  const [busquedaAnterior, setBusquedaAnterior] = useState(busqueda);
+  if (busqueda !== busquedaAnterior) {
+    setBusquedaAnterior(busqueda);
+    setPagina(1);
+  }
+
+  const totalPaginas = Math.max(1, Math.ceil(filtrados.length / TAMANO_PAGINA));
+  const visibles = filtrados.slice((pagina - 1) * TAMANO_PAGINA, pagina * TAMANO_PAGINA);
 
   return (
     <div>
@@ -68,7 +81,7 @@ export function ProyectosList({ proyectos }: { proyectos: Proyecto[] }) {
         </div>
       ) : (
         <ul className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-          {filtrados.map((proyecto) => {
+          {visibles.map((proyecto) => {
             const pasos = proyecto.ejecucionesProtocolo.flatMap((e) => e.pasos);
             const progreso = contarProgreso(pasos);
             const proyectoCompleto = progreso.total > 0 && progreso.completos === progreso.total;
@@ -114,6 +127,8 @@ export function ProyectosList({ proyectos }: { proyectos: Proyecto[] }) {
           })}
         </ul>
       )}
+
+      <Paginacion pagina={pagina} totalPaginas={totalPaginas} onCambiar={setPagina} />
     </div>
   );
 }

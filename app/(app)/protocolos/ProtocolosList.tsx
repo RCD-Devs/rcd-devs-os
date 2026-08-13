@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { ClipboardList, FolderKanban, Search } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { Paginacion } from "@/components/ui/Paginacion";
 import { iconoProtocolo } from "@/lib/protocolos/icono";
 import { slugify } from "@/lib/slug";
 import { TONE_BG_TEXT, toneFromString } from "@/lib/ui/tone";
@@ -19,8 +20,11 @@ type ProtocoloResumen = {
   nEjecuciones: number;
 };
 
+const TAMANO_PAGINA = 20;
+
 export function ProtocolosList({ protocolos }: { protocolos: ProtocoloResumen[] }) {
   const [busqueda, setBusqueda] = useState("");
+  const [pagina, setPagina] = useState(1);
 
   const filtrados = useMemo(() => {
     const q = busqueda.trim().toLowerCase();
@@ -29,6 +33,15 @@ export function ProtocolosList({ protocolos }: { protocolos: ProtocoloResumen[] 
       (p) => p.nombre.toLowerCase().includes(q) || p.objetivo.toLowerCase().includes(q),
     );
   }, [protocolos, busqueda]);
+
+  const [busquedaAnterior, setBusquedaAnterior] = useState(busqueda);
+  if (busqueda !== busquedaAnterior) {
+    setBusquedaAnterior(busqueda);
+    setPagina(1);
+  }
+
+  const totalPaginas = Math.max(1, Math.ceil(filtrados.length / TAMANO_PAGINA));
+  const visibles = filtrados.slice((pagina - 1) * TAMANO_PAGINA, pagina * TAMANO_PAGINA);
 
   return (
     <div>
@@ -59,7 +72,7 @@ export function ProtocolosList({ protocolos }: { protocolos: ProtocoloResumen[] 
         </div>
       ) : (
         <ul className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {filtrados.map((protocolo) => {
+          {visibles.map((protocolo) => {
             const Icono = iconoProtocolo(protocolo.id);
             const tone = toneFromString(protocolo.id);
 
@@ -105,6 +118,8 @@ export function ProtocolosList({ protocolos }: { protocolos: ProtocoloResumen[] 
           })}
         </ul>
       )}
+
+      <Paginacion pagina={pagina} totalPaginas={totalPaginas} onCambiar={setPagina} />
     </div>
   );
 }

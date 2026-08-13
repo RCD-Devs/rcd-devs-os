@@ -6,17 +6,33 @@ import { Building2, FolderKanban, Search } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { Paginacion } from "@/components/ui/Paginacion";
 
 type Cliente = { id: string; nombre: string; _count: { proyectos: number } };
 
+const TAMANO_PAGINA = 24;
+
 export function ClientesList({ clientes }: { clientes: Cliente[] }) {
   const [busqueda, setBusqueda] = useState("");
+  const [pagina, setPagina] = useState(1);
 
   const filtrados = useMemo(() => {
     const q = busqueda.trim().toLowerCase();
     if (!q) return clientes;
     return clientes.filter((c) => c.nombre.toLowerCase().includes(q));
   }, [clientes, busqueda]);
+
+  // Volver a pagina 1 cuando cambia la busqueda: ajuste de estado durante el
+  // render (patron ya usado en Sidebar.tsx), no un efecto, para evitar el
+  // frame extra de un setState dentro de useEffect.
+  const [busquedaAnterior, setBusquedaAnterior] = useState(busqueda);
+  if (busqueda !== busquedaAnterior) {
+    setBusquedaAnterior(busqueda);
+    setPagina(1);
+  }
+
+  const totalPaginas = Math.max(1, Math.ceil(filtrados.length / TAMANO_PAGINA));
+  const visibles = filtrados.slice((pagina - 1) * TAMANO_PAGINA, pagina * TAMANO_PAGINA);
 
   return (
     <div>
@@ -45,7 +61,7 @@ export function ClientesList({ clientes }: { clientes: Cliente[] }) {
         </div>
       ) : (
         <ul className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filtrados.map((cliente) => (
+          {visibles.map((cliente) => (
             <li key={cliente.id}>
               <Link href={`/clientes/${cliente.id}`}>
                 <Card className="flex items-center gap-3 transition-colors hover:border-accent">
@@ -63,6 +79,8 @@ export function ClientesList({ clientes }: { clientes: Cliente[] }) {
           ))}
         </ul>
       )}
+
+      <Paginacion pagina={pagina} totalPaginas={totalPaginas} onCambiar={setPagina} />
     </div>
   );
 }

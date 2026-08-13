@@ -1,4 +1,6 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@/app/generated/prisma/client";
 import { Card } from "@/components/ui/Card";
@@ -13,12 +15,31 @@ import { ExportarCsvButton } from "./ExportarCsvButton";
 // prerenderizar estaticamente (mismo criterio que /protocolos).
 export const dynamic = "force-dynamic";
 
-const LIMITE = 100;
+const TAMANO_PAGINA = 50;
+
+type FiltrosAuditoria = {
+  desde?: string;
+  hasta?: string;
+  usuarioId?: string;
+  entidad?: string;
+  page?: string;
+};
+
+function hrefConPagina(filtros: FiltrosAuditoria, page: number): string {
+  const params = new URLSearchParams();
+  if (filtros.desde) params.set("desde", filtros.desde);
+  if (filtros.hasta) params.set("hasta", filtros.hasta);
+  if (filtros.usuarioId) params.set("usuarioId", filtros.usuarioId);
+  if (filtros.entidad) params.set("entidad", filtros.entidad);
+  if (page > 1) params.set("page", String(page));
+  const qs = params.toString();
+  return qs ? `/auditoria?${qs}` : "/auditoria";
+}
 
 export default async function AuditoriaPage({
   searchParams,
 }: {
-  searchParams: Promise<{ desde?: string; hasta?: string; usuarioId?: string; entidad?: string }>;
+  searchParams: Promise<FiltrosAuditoria>;
 }) {
   const usuarioActual = await getCurrentUser();
 
@@ -30,7 +51,9 @@ export default async function AuditoriaPage({
     redirect("/dashboard");
   }
 
-  const { desde, hasta, usuarioId, entidad } = await searchParams;
+  const filtros = await searchParams;
+  const { desde, hasta, usuarioId, entidad } = filtros;
+  const page = Math.max(1, Number(filtros.page) || 1);
 
   const where: Prisma.EventoAuditoriaWhereInput = {};
   if (usuarioId) where.usuarioId = usuarioId;
@@ -47,13 +70,15 @@ export default async function AuditoriaPage({
 
   const hayFiltros = Boolean(desde || hasta || usuarioId || entidad);
 
-  const [eventos, usuarios, entidades] = await Promise.all([
+  const [eventos, totalEventos, usuarios, entidades] = await Promise.all([
     prisma.eventoAuditoria.findMany({
       where,
       include: { usuario: true },
       orderBy: { createdAt: "desc" },
-      take: LIMITE,
+      skip: (page - 1) * TAMANO_PAGINA,
+      take: TAMANO_PAGINA,
     }),
+    prisma.eventoAuditoria.count({ where }),
     prisma.usuario.findMany({ orderBy: { nombre: "asc" } }),
     prisma.eventoAuditoria.findMany({
       distinct: ["entidad"],
@@ -62,14 +87,17 @@ export default async function AuditoriaPage({
     }),
   ]);
 
+  const totalPaginas = Math.max(1, Math.ceil(totalEventos / TAMANO_PAGINA));
+
   return (
     <div>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-text">Auditoría</h1>
           <p className="mt-2 text-sm text-text-muted">
-            Registro append-only de cambios clave (últimos {LIMITE}
-            {hayFiltros ? " que calzan con el filtro" : ""}). Solo lectura: no se puede editar ni
+            Registro append-only de cambios clave — {totalEventos} evento
+            {totalEventos === 1 ? "" : "s"}
+            {hayFiltros ? " que calzan con el filtro" : ""}. Solo lectura: no se puede editar ni
             borrar desde la app.
           </p>
         </div>
@@ -154,6 +182,38 @@ export default async function AuditoriaPage({
             </li>
           ))}
         </ul>
+      )}
+
+      {totalPaginas > 1 && (
+        <div className="mt-6 flex items-center justify-center gap-3">
+          <Link
+            href={hrefConPagina(filtros, page - 1)}
+            aria-disabled={page <= 1}
+            className={`inline-flex items-center gap-1 rounded-md border border-border px-2.5 py-1.5 text-xs ${
+              page <= 1
+                ? "pointer-events-none opacity-40"
+                : "text-text hover:bg-surface-hover"
+            }`}
+          >
+            <ChevronLeft size={14} strokeWidth={2} />
+            Anterior
+          </Link>
+          <span className="font-mono text-xs text-text-muted">
+            Página {page} de {totalPaginas}
+          </span>
+          <Link
+            href={hrefConPagina(filtros, page + 1)}
+            aria-disabled={page >= totalPaginas}
+            className={`inline-flex items-center gap-1 rounded-md border border-border px-2.5 py-1.5 text-xs ${
+              page >= totalPaginas
+                ? "pointer-events-none opacity-40"
+                : "text-text hover:bg-surface-hover"
+            }`}
+          >
+            Siguiente
+            <ChevronRight size={14} strokeWidth={2} />
+          </Link>
+        </div>
       )}
     </div>
   );

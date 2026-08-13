@@ -96,7 +96,7 @@ Se va tildando a medida que se implementa.
 - [x] #12 Duplicar protocolo
 - [x] #7 Auditoría con filtro de fecha/usuario/entidad
 - [x] #15 Archivar proyectos completados
-- [ ] #1 Paginación en listas largas
+- [x] #1 Paginación en listas largas
 - [ ] #21 Rate limiting básico en rutas de API
 - [ ] #29 Suspense granular en `/alertas`
 - [ ] #35 Exportar el dashboard completo a PDF
@@ -126,7 +126,7 @@ Propuestas propias, agrupadas por área. Ninguna depende de JIRA. El check indic
 
 ### UX/UI
 
-1. **Paginación en las listas** — hoy `/proyectos`, `/protocolos`, `/clientes`, `/auditoria` traen todos los registros sin límite; funciona con los volúmenes actuales pero no escala.
+1. ✅ **Paginación en las listas** — `/proyectos`, `/protocolos` y `/clientes` siguen trayendo todo (los volúmenes actuales no lo justifican y así el buscador client-side sigue viendo el set completo), pero ahora paginan el *render* (`components/ui/Paginacion.tsx`, 20-24 por página) en vez de listar cientos de cards de una vez, y la página se resetea a 1 al escribir en el buscador. `/auditoria` sí traía datos acotados sin forma de ver más: ahora pagina de verdad a nivel de Prisma (`skip`/`take` + `count`, 50 por página, filtros preservados en la URL).
 2. **Buscador global (Cmd/Ctrl+K)** — un solo cuadro que busque a la vez en proyectos, protocolos, clientes y solicitudes, en vez de tres buscadores independientes por vista.
 3. **Pantalla de error propia** (`error.tsx` de Next.js) — hoy un error no controlado muestra el mensaje crudo de Next con el `digest`; una pantalla con "algo salió mal, reintentar" es más apropiada para usuarios no técnicos.
 4. ✅ **Modo oscuro con toggle manual** — botón en el sidebar (`ThemeToggle.tsx`) que cicla Automático → Claro → Oscuro, guardado en `localStorage` y aplicado via `data-theme` en `<html>` (con `suppressHydrationWarning` para el script anti-FOUC que lo fija antes del primer paint). De paso se corrigió `--color-surface-hover`, un token que varios botones ya referenciaban en Tailwind pero no existía, y el salto de contraste `bg-surface`→`bg-bg` en hover que era casi imperceptible en tema oscuro.

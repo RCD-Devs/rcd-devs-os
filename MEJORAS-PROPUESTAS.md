@@ -85,7 +85,7 @@ Se va tildando a medida que se implementa.
 
 **Tier 2 — simple (una feature acotada, sin cambio de schema)**
 - [x] #24 Validación de tamaño/tipo de archivo en el upload de evidencia
-- [x] #18 Más tests unitarios en funciones puras (`slug.ts`, `actionResult.ts`, semáforo) — el doc decía "0% cobertura", ya no es exacto
+- [x] #18 Más tests unitarios en funciones puras (`slug.ts`, `actionResult.ts`) — el doc decía "ni un solo `.test.ts` en el repo", ya no era exacto (`lib/protocolos/estados.test.ts` existía). Sigue faltando cobertura de `lib/proyectos/semaforo.ts` y de la capa de Server Actions.
 - [ ] #4 Modo oscuro con toggle manual
 - [ ] #6 Onboarding para cuenta sin rol (mostrar titulares de Líder técnico/Director·a)
 - [ ] #33 Exportar auditoría a CSV
@@ -147,7 +147,7 @@ Propuestas propias, agrupadas por área. Ninguna depende de JIRA. El check indic
 
 ### Calidad y mantenibilidad
 
-18. **Tests automatizados** — `vitest` está instalado y hay un script `test` en `package.json`, pero no existe ni un solo archivo `.test.ts` en el repo: cobertura real es 0%.
+18. **Tests automatizados** — `vitest` está instalado; hay tests para `lib/protocolos/estados.ts`, `lib/slug.ts` y `lib/actionResult.ts`, pero ninguno para `lib/proyectos/semaforo.ts` (la lógica más sensible a errores silenciosos) ni para la capa de Server Actions/permisos.
 19. **CI en GitHub Actions** — typecheck + lint + build en cada PR. Hoy nada impide mergear código que no compila.
 20. **README con instrucciones de seed** — cómo correr `npx prisma db seed`, qué protocolos siembra y que el contenido de Seguridad WordPress es un borrador (para que no se asuma que es el xlsx real).
 21. **Rate limiting básico en las rutas de API** (`/api/ejecucion-paso/[id]`, `/api/ejecucion-protocolo`) — hoy cualquier request autenticado puede llamarlas sin límite de frecuencia.
@@ -156,7 +156,7 @@ Propuestas propias, agrupadas por área. Ninguna depende de JIRA. El check indic
 ### Seguridad y datos
 
 23. **RLS diferenciado por rol** — hoy todas las policies son "cualquier autenticado lee/escribe"; la diferencia entre admin y el resto de los roles vive solo en el código de la aplicación, no en la base de datos. Si alguien pega directo contra Supabase con la clave equivocada, no hay una segunda barrera por rol.
-24. **Validación de tamaño/tipo de archivo en el upload de evidencia** — hoy el bucket `evidencia` acepta cualquier archivo sin límite de tamaño ni tipo MIME.
+24. ✅ **Validación de tamaño/tipo de archivo en el upload de evidencia** — `EvidenciaField.tsx` valida 15MB máx. y tipos permitidos (imagen/PDF/Office/texto) antes de subir. **Es solo client-side**: el upload va directo del browser al bucket, no pasa por una Server Action, así que un cliente que se salte el chequeo igual podría subir cualquier cosa. La barrera real de defensa en profundidad es configurar `fileSizeLimit`/`allowedMimeTypes` en el bucket `evidencia` desde Supabase (Project Settings → Storage) — no se hizo porque requiere `SUPABASE_SERVICE_ROLE_KEY` a mano fuera de este repo.
 25. **Headers de seguridad HTTP** (CSP, `X-Frame-Options`, etc.) — Next no los configura por default y hoy no hay ninguno custom en `next.config.ts`.
 26. **Rotar y documentar `SUPABASE_SERVICE_ROLE_KEY`** cuando se agregue (punto pendiente de arriba) — es la clave más sensible del proyecto, con acceso total a Supabase; dejar por escrito quién la generó y cuándo rotarla.
 27. **Política de retención explícita** para el bucket de Storage y para `EventoAuditoria` — hoy crecen indefinidamente sin un criterio de cuánto tiempo se conservan.

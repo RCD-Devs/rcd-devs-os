@@ -99,7 +99,7 @@ Se va tildando a medida que se implementa.
 - [x] #1 Paginación en listas largas
 - [x] #21 Rate limiting básico en rutas de API
 - [x] #29 Suspense granular en `/alertas`
-- [ ] #35 Exportar el dashboard completo a PDF
+- [x] #35 Exportar el dashboard completo a PDF
 - [ ] #32 Dashboard de cumplimiento por cliente
 - [ ] #16 Comentarios en Solicitudes (modelo nuevo)
 - [ ] #11 Adjuntar múltiples archivos por paso (modelo nuevo)
@@ -174,4 +174,4 @@ Propuestas propias, agrupadas por área. Ninguna depende de JIRA. El check indic
 32. **Dashboard de cumplimiento por cliente** — hoy el % de protocolos completos se ve por proyecto individual, no agregado por cliente (útil para una reunión de cuenta).
 33. ✅ **Exportar auditoría a CSV** — botón client-side en `/auditoria` (con BOM UTF-8 para que Excel no rompa tildes). Exporta los últimos 100 eventos cargados en la página, no toda la tabla histórica.
 34. **Métricas de tiempo por protocolo** — cuánto tarda en promedio un protocolo en completarse, por tipo de protocolo; sirve para estimar mejor futuros proyectos.
-35. **Exportar el dashboard completo a PDF**, no solo un checklist individual — un snapshot de "estado de todos los proyectos" para compartir en una reunión.
+35. ✅ **Exportar el dashboard completo a PDF** (`/dashboard/imprimir`) — tabla de todos los proyectos activos (cliente, etapa, progreso, semáforo) en la misma vista imprimible + `window.print()` que ya se usaba para un checklist individual; `PrintButton` se movió a `components/ui/` para compartirlo entre ambas.

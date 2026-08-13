@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { contarProgreso, esEstadoTerminal } from "@/lib/protocolos/estados";
-import { PrintButton } from "./PrintButton";
+import { PrintButton } from "@/components/ui/PrintButton";
 
 export default async function ImprimirChecklistPage({
   params,

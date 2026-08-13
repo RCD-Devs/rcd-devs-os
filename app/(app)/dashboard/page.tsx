@@ -1,5 +1,6 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Building2, CircleCheckBig, FolderKanban, ListChecks } from "lucide-react";
+import { Building2, CircleCheckBig, FileDown, FolderKanban, ListChecks } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth/getCurrentUser";
 import { prisma } from "@/lib/prisma";
 import { getEtapas } from "@/lib/catalogos";
@@ -79,10 +80,19 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold tracking-tight text-text">
-        Hola {usuario.nombre ?? usuario.email}
-        {usuario.rol ? ` — ${usuario.rol.nombre}` : ""}
-      </h1>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <h1 className="text-2xl font-bold tracking-tight text-text">
+          Hola {usuario.nombre ?? usuario.email}
+          {usuario.rol ? ` — ${usuario.rol.nombre}` : ""}
+        </h1>
+        <Link
+          href="/dashboard/imprimir"
+          className="flex items-center gap-1.5 text-sm text-text-muted hover:text-accent"
+        >
+          <FileDown size={15} strokeWidth={2} />
+          Exportar a PDF
+        </Link>
+      </div>
 
       {!usuario.rol && (
         <div className="mt-2 text-sm text-text-muted">

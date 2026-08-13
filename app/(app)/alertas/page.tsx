@@ -22,6 +22,7 @@ function diasHasta(fecha: Date): number {
 export default async function AlertasPage() {
   const [proyectos, solicitudes] = await Promise.all([
     prisma.proyecto.findMany({
+      where: { archivado: false },
       include: {
         cliente: true,
         ejecucionesProtocolo: { select: { estado: true, fechaLimite: true } },

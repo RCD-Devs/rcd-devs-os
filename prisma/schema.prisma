@@ -118,6 +118,10 @@ model Proyecto {
   etapaActualId   String    @map("etapa_actual_id") @db.Uuid
   fechaInicio     DateTime? @map("fecha_inicio") @db.Date
   fechaCompromiso DateTime? @map("fecha_compromiso") @db.Date
+  /// Un proyecto archivado sale del semaforo/alertas y de las listas por
+  /// defecto (sigue existiendo, solo deja de contar como "activo"). Ver #15
+  /// de MEJORAS-PROPUESTAS.md.
+  archivado       Boolean   @default(false)
 
   cliente     Cliente @relation(fields: [clienteId], references: [id])
   etapaActual Etapa   @relation(fields: [etapaActualId], references: [id])

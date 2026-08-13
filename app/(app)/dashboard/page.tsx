@@ -37,6 +37,7 @@ export default async function DashboardPage() {
 
   const [proyectos, protocolos, clientesTotales, etapas, contactosAdmin] = await Promise.all([
     prisma.proyecto.findMany({
+      where: { archivado: false },
       include: {
         cliente: true,
         etapaActual: true,

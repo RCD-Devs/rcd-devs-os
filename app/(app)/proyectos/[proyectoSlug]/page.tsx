@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { EtapaSelector } from "./EtapaSelector";
 import { IniciarProtocoloButton } from "./IniciarProtocoloButton";
 import { EliminarProyectoButton } from "./EliminarProyectoButton";
+import { ArchivarProyectoButton } from "./ArchivarProyectoButton";
 import { Card } from "@/components/ui/Card";
 import { EstadoBadge } from "@/components/ui/Badge";
 import { ProgressBar } from "@/components/ui/ProgressBar";
@@ -70,6 +71,11 @@ export default async function ProyectoPage({
         <SemaforoDot semaforo={semaforo} />
         <h1 className="text-2xl font-bold tracking-tight text-text">{proyecto.nombre}</h1>
         <span className="text-xs text-text-muted">{SEMAFORO_LABEL[semaforo]}</span>
+        {proyecto.archivado && (
+          <span className="rounded-full bg-neutral-badge-bg px-2 py-0.5 text-xs font-medium text-neutral-badge">
+            Archivado
+          </span>
+        )}
       </div>
       <p className="text-sm text-text-muted">{proyecto.cliente.nombre}</p>
 
@@ -124,11 +130,14 @@ export default async function ProyectoPage({
         })}
       </ul>
 
-      {esAdmin(usuario) && (
-        <div className="mt-10 border-t border-border pt-6">
-          <EliminarProyectoButton proyectoId={proyecto.id} />
-        </div>
-      )}
+      <div className="mt-10 flex items-center justify-between border-t border-border pt-6">
+        <ArchivarProyectoButton
+          proyectoId={proyecto.id}
+          proyectoSlug={proyectoSlug}
+          archivado={proyecto.archivado}
+        />
+        {esAdmin(usuario) && <EliminarProyectoButton proyectoId={proyecto.id} />}
+      </div>
     </div>
   );
 }

@@ -48,6 +48,37 @@ export async function actualizarEtapaProyecto(
   return ok(null);
 }
 
+export async function archivarProyecto(
+  proyectoId: string,
+  archivado: boolean,
+  proyectoSlug: string,
+): Promise<ActionResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return fail("No autenticado");
+  }
+
+  await prisma.proyecto.update({ where: { id: proyectoId }, data: { archivado } });
+
+  await registrarEvento({
+    entidad: "Proyecto",
+    entidadId: proyectoId,
+    usuarioId: user.id,
+    accion: archivado ? "archivado" : "desarchivado",
+  });
+
+  revalidatePath(`/proyectos/${proyectoSlug}`);
+  revalidatePath("/proyectos");
+  revalidatePath("/dashboard");
+  revalidatePath("/alertas");
+
+  return ok(null);
+}
+
 export async function eliminarProyecto(proyectoId: string): Promise<ActionResult> {
   const usuario = await getCurrentUser();
 

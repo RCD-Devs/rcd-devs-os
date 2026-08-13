@@ -14,7 +14,7 @@ export default async function SolicitudesPage() {
       include: { proyecto: true, responsableRol: true, solicitante: true },
       orderBy: { createdAt: "desc" },
     }),
-    prisma.proyecto.findMany({ orderBy: { nombre: "asc" } }),
+    prisma.proyecto.findMany({ where: { archivado: false }, orderBy: { nombre: "asc" } }),
     getRoles(),
   ]);
 

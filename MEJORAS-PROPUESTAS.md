@@ -103,7 +103,7 @@ Se va tildando a medida que se implementa.
 - [x] #32 Dashboard de cumplimiento por cliente
 - [x] #16 Comentarios en Solicitudes (modelo nuevo)
 - [x] #11 Adjuntar múltiples archivos por paso (modelo nuevo)
-- [ ] #14 Timeline de proyecto
+- [x] #14 Timeline de proyecto
 - [ ] #17 Picker de usuario con búsqueda
 
 **Tier 4 — grande / depende de una decisión externa**
@@ -141,7 +141,7 @@ Propuestas propias, agrupadas por área. Ninguna depende de JIRA. El check indic
 11. ✅ **Adjuntar múltiples archivos por paso** — modelo `EvidenciaPaso` nuevo (migración `20260813180000_add_evidencia_paso`), `AdjuntosPaso.tsx` reemplaza a `EvidenciaField` como forma de agregar evidencia. El campo legacy `evidenciaUrl` no se migra ni se borra: si un paso ya tenía uno, se sigue mostrando (con botón para quitarlo) junto a los adjuntos nuevos, para no perder evidencia ya subida.
 12. ✅ **Duplicar protocolo** — botón "Duplicar" en el detalle del protocolo; crea uno nuevo ("Nombre (copia)", con contador si ya existe) con los mismos pasos/estados de la versión vigente como v1, y redirige directo a editarlo.
 13. **Plantillas de proyecto** — crear un proyecto que ya arranque con ciertos protocolos pre-iniciados según el tipo de proyecto (ej. todo proyecto WordPress arranca con "Seguridad WordPress" en curso).
-14. **Timeline de proyecto** — vista dedicada de cambios de etapa a lo largo del tiempo (hoy ese historial existe en `EventoAuditoria` pero no hay una vista que lo muestre agrupado por proyecto).
+14. ✅ **Timeline de proyecto** (`/proyectos/[slug]/timeline`) — `EventoAuditoria` filtrado por `entidad: "Proyecto"` y el id del proyecto, agrupado en una línea de tiempo vertical (creación, cambios de etapa con nombre de etapa anterior/nueva, archivar/desarchivar); link desde el detalle del proyecto.
 15. ✅ **Archivar proyectos completados** — columna `Proyecto.archivado` (migración `20260813160000_add_proyecto_archivado`); toggle "Archivar"/"Desarchivar" en el detalle del proyecto. Excluido por defecto de `/proyectos` (con tab "Activos/Archivados"), `/dashboard`, `/alertas` y del selector de proyecto al crear una Solicitud.
 16. ✅ **Comentarios en Solicitudes** — modelo `ComentarioSolicitud` nuevo (migración `20260813170000_add_comentario_solicitud`, mismo criterio de RLS que `Comentario`), sección expandible en cada `SolicitudRow` igual al patrón ya usado en pasos de checklist.
 17. **Picker de usuario con búsqueda** — el selector de titular/reemplazo en `/roles` y el de responsable en `/usuarios` son `<select>` simples; con más usuarios conviene un combobox con búsqueda.

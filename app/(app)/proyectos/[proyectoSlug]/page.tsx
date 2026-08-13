@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, History } from "lucide-react";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { EtapaSelector } from "./EtapaSelector";
@@ -77,7 +77,16 @@ export default async function ProyectoPage({
           </span>
         )}
       </div>
-      <p className="text-sm text-text-muted">{proyecto.cliente.nombre}</p>
+      <div className="flex items-center gap-3">
+        <p className="text-sm text-text-muted">{proyecto.cliente.nombre}</p>
+        <Link
+          href={`/proyectos/${proyectoSlug}/timeline`}
+          className="flex items-center gap-1 text-xs text-accent hover:underline"
+        >
+          <History size={12} strokeWidth={2} />
+          Timeline
+        </Link>
+      </div>
 
       <div className="mt-4 flex items-center gap-2">
         <span className="text-sm text-text-muted">Etapa actual:</span>

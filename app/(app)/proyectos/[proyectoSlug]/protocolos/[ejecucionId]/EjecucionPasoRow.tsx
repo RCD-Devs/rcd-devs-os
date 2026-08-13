@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { variantParaEstado } from "@/components/ui/Badge";
 import { useToast } from "@/components/ui/Toast";
 import { esEstadoTerminal } from "@/lib/protocolos/estados";
-import { EvidenciaField } from "./EvidenciaField";
+import { AdjuntosPaso } from "./AdjuntosPaso";
 
 // Color inline (no clase) para el borde izquierdo: si dependiera de una
 // utilidad Tailwind, competiria en cascada con el "border-border" base de
@@ -37,6 +37,7 @@ export function EjecucionPasoRow({
     estado: string;
     notas: string | null;
     evidenciaUrl: string | null;
+    evidencias: Array<{ id: string; valor: string }>;
     fechaEjecucion: Date | null;
     responsable: { nombre: string | null; email: string } | null;
     comentarios: Array<{
@@ -52,7 +53,6 @@ export function EjecucionPasoRow({
   const { showToast } = useToast();
   const [estado, setEstado] = useState(paso.estado);
   const [notas, setNotas] = useState(paso.notas ?? "");
-  const [evidenciaUrl, setEvidenciaUrl] = useState(paso.evidenciaUrl ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [nuevoComentario, setNuevoComentario] = useState("");
@@ -170,12 +170,13 @@ export function EjecucionPasoRow({
       {expanded && (
         <>
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
-            <EvidenciaField
+            <AdjuntosPaso
               pasoId={paso.id}
-              value={evidenciaUrl}
+              evidencias={paso.evidencias}
+              evidenciaLegacy={paso.evidenciaUrl}
               disabled={saving}
-              onChange={setEvidenciaUrl}
-              onGuardarInmediato={(v) => guardar({ evidenciaUrl: v })}
+              onQuitarLegacy={() => guardar({ evidenciaUrl: "" })}
+              onCambio={() => router.refresh()}
             />
             <Input
               type="text"

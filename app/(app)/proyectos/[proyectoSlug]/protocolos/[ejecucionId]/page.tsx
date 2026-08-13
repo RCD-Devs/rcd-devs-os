@@ -23,6 +23,7 @@ export default async function ChecklistEjecucionPage({
         include: {
           responsable: true,
           comentarios: { include: { autor: true }, orderBy: { createdAt: "asc" } },
+          evidencias: { orderBy: { createdAt: "asc" } },
         },
       },
     },

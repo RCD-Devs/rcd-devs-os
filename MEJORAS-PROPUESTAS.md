@@ -102,7 +102,7 @@ Se va tildando a medida que se implementa.
 - [x] #35 Exportar el dashboard completo a PDF
 - [x] #32 Dashboard de cumplimiento por cliente
 - [x] #16 Comentarios en Solicitudes (modelo nuevo)
-- [ ] #11 Adjuntar múltiples archivos por paso (modelo nuevo)
+- [x] #11 Adjuntar múltiples archivos por paso (modelo nuevo)
 - [ ] #14 Timeline de proyecto
 - [ ] #17 Picker de usuario con búsqueda
 
@@ -138,7 +138,7 @@ Propuestas propias, agrupadas por área. Ninguna depende de JIRA. El check indic
 
 9. **Notificaciones reales por correo** (vía Resend o el propio SMTP de Supabase, sin Slack ni JIRA) para: solicitud asignada a tu rol, fecha de compromiso a ≤48h, protocolo con gate incumplido en la etapa actual.
 10. **Cron diario de alertas** — hoy `/alertas` es "on-demand" (solo se calcula si alguien entra a mirar); un cron que corra la misma lógica una vez al día y dispare la notificación del punto 9 la vuelve proactiva.
-11. **Adjuntar múltiples archivos por paso** — hoy `evidencia_url` es un solo valor (link o archivo); un paso de checklist a veces necesita más de una evidencia.
+11. ✅ **Adjuntar múltiples archivos por paso** — modelo `EvidenciaPaso` nuevo (migración `20260813180000_add_evidencia_paso`), `AdjuntosPaso.tsx` reemplaza a `EvidenciaField` como forma de agregar evidencia. El campo legacy `evidenciaUrl` no se migra ni se borra: si un paso ya tenía uno, se sigue mostrando (con botón para quitarlo) junto a los adjuntos nuevos, para no perder evidencia ya subida.
 12. ✅ **Duplicar protocolo** — botón "Duplicar" en el detalle del protocolo; crea uno nuevo ("Nombre (copia)", con contador si ya existe) con los mismos pasos/estados de la versión vigente como v1, y redirige directo a editarlo.
 13. **Plantillas de proyecto** — crear un proyecto que ya arranque con ciertos protocolos pre-iniciados según el tipo de proyecto (ej. todo proyecto WordPress arranca con "Seguridad WordPress" en curso).
 14. **Timeline de proyecto** — vista dedicada de cambios de etapa a lo largo del tiempo (hoy ese historial existe en `EventoAuditoria` pero no hay una vista que lo muestre agrupado por proyecto).

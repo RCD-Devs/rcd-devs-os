@@ -19,6 +19,7 @@ export default async function ImprimirChecklistPage({
         include: {
           responsable: true,
           comentarios: { include: { autor: true }, orderBy: { createdAt: "asc" } },
+          evidencias: { orderBy: { createdAt: "asc" } },
         },
       },
     },
@@ -58,12 +59,19 @@ export default async function ImprimirChecklistPage({
               </span>
             </p>
 
-            {paso.evidenciaUrl && (
+            {(paso.evidenciaUrl || paso.evidencias.length > 0) && (
               <p className="mt-1 text-sm text-text-muted">
                 Evidencia:{" "}
-                {paso.evidenciaUrl.startsWith("storage:")
-                  ? `archivo adjunto (${paso.evidenciaUrl.split("/").pop()})`
-                  : paso.evidenciaUrl}
+                {[
+                  ...(paso.evidenciaUrl ? [paso.evidenciaUrl] : []),
+                  ...paso.evidencias.map((e) => e.valor),
+                ]
+                  .map((valor) =>
+                    valor.startsWith("storage:")
+                      ? `archivo adjunto (${valor.split("/").pop()})`
+                      : valor,
+                  )
+                  .join(" · ")}
               </p>
             )}
             {paso.notas && <p className="mt-1 text-sm text-text-muted">Notas: {paso.notas}</p>}

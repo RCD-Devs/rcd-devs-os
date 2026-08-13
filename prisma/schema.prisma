@@ -39,6 +39,7 @@ model Usuario {
   eventosAuditoria     EventoAuditoria[]
   comentarios          Comentario[]
   comentariosSolicitud ComentarioSolicitud[]
+  evidenciasCreadas    EvidenciaPaso[]
 
   @@map("Usuario")
 }
@@ -184,6 +185,9 @@ model EjecucionPaso {
   pasoNombre     String    @map("paso_nombre")
   estado         String
   responsableId  String?   @map("responsable_id") @db.Uuid
+  /// Campo legacy, un solo valor: se deja de escribir desde la UI (ver
+  /// EvidenciaPaso para multiples adjuntos, #11 de MEJORAS-PROPUESTAS.md)
+  /// pero no se migra ni se borra para no perder evidencia ya subida.
   evidenciaUrl   String?   @map("evidencia_url")
   fechaEjecucion DateTime? @map("fecha_ejecucion")
   notas          String?
@@ -191,8 +195,27 @@ model EjecucionPaso {
   ejecucion   EjecucionProtocolo @relation(fields: [ejecucionId], references: [id])
   responsable Usuario?           @relation(fields: [responsableId], references: [id])
   comentarios Comentario[]
+  evidencias  EvidenciaPaso[]
 
   @@map("EjecucionPaso")
+}
+
+/// Multiples adjuntos por paso (#11 de MEJORAS-PROPUESTAS.md), reemplaza de
+/// facto a EjecucionPaso.evidenciaUrl (un solo valor) para evidencia nueva
+/// sin migrar/borrar la ya existente. `valor` usa el mismo formato que el
+/// campo legacy: "storage:<path>" para un archivo del bucket privado, o un
+/// link externo tal cual.
+model EvidenciaPaso {
+  id              String   @id @default(uuid()) @db.Uuid
+  ejecucionPasoId String   @map("ejecucion_paso_id") @db.Uuid
+  valor           String
+  creadoPorId     String?  @map("creado_por_id") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  ejecucionPaso EjecucionPaso @relation(fields: [ejecucionPasoId], references: [id])
+  creadoPor     Usuario?      @relation(fields: [creadoPorId], references: [id])
+
+  @@map("EvidenciaPaso")
 }
 
 /// Flujo de solicitud interno (roadmap #5), sin integracion JIRA: formulario

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import type { Prisma } from "@/app/generated/prisma/client";
+import { rateLimit, respuestaLimiteExcedido } from "@/lib/rateLimit";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -11,6 +12,12 @@ export async function POST(request: Request) {
 
   if (!user) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+  }
+
+  // Iniciar un protocolo es una accion poco frecuente en el uso normal.
+  const limite = rateLimit(`ejecucion-protocolo:${user.id}`, 20, 60_000);
+  if (!limite.permitido) {
+    return respuestaLimiteExcedido(limite.reintentarEnMs);
   }
 
   const body = (await request.json()) as {

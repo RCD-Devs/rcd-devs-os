@@ -97,7 +97,7 @@ Se va tildando a medida que se implementa.
 - [x] #7 Auditoría con filtro de fecha/usuario/entidad
 - [x] #15 Archivar proyectos completados
 - [x] #1 Paginación en listas largas
-- [ ] #21 Rate limiting básico en rutas de API
+- [x] #21 Rate limiting básico en rutas de API
 - [ ] #29 Suspense granular en `/alertas`
 - [ ] #35 Exportar el dashboard completo a PDF
 - [ ] #32 Dashboard de cumplimiento por cliente
@@ -151,7 +151,7 @@ Propuestas propias, agrupadas por área. Ninguna depende de JIRA. El check indic
 18. **Tests automatizados** — `vitest` está instalado; hay tests para `lib/protocolos/estados.ts`, `lib/slug.ts` y `lib/actionResult.ts`, pero ninguno para `lib/proyectos/semaforo.ts` (la lógica más sensible a errores silenciosos) ni para la capa de Server Actions/permisos.
 19. **CI en GitHub Actions** — typecheck + lint + build en cada PR. Hoy nada impide mergear código que no compila.
 20. **README con instrucciones de seed** — cómo correr `npx prisma db seed`, qué protocolos siembra y que el contenido de Seguridad WordPress es un borrador (para que no se asuma que es el xlsx real).
-21. **Rate limiting básico en las rutas de API** (`/api/ejecucion-paso/[id]`, `/api/ejecucion-protocolo`) — hoy cualquier request autenticado puede llamarlas sin límite de frecuencia.
+21. ✅ **Rate limiting básico en las rutas de API** (`lib/rateLimit.ts`) — fixed window en memoria por usuario, sin dependencias nuevas: 60/min en `PATCH /api/ejecucion-paso/[id]`, 30/min en `POST .../comentarios`, 20/min en `POST /api/ejecucion-protocolo`. Es por instancia de función, no distribuido entre instancias — suficiente como primera barrera, no un límite estricto; eso pediría un store compartido (Upstash Redis vía Marketplace, ver #23/#9 que sí tocan infraestructura nueva).
 22. **Storybook o catálogo de componentes** — `components/ui/` ya tiene un sistema de diseño consistente (Card, Badge, Button, etc.); documentarlo visualmente ayuda a mantener consistencia cuando el equipo crezca.
 
 ### Seguridad y datos

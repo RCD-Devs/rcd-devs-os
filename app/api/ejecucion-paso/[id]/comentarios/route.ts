@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { registrarEvento } from "@/lib/auditoria";
+import { rateLimit, respuestaLimiteExcedido } from "@/lib/rateLimit";
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient();
@@ -11,6 +12,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   if (!user) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+  }
+
+  const limite = rateLimit(`ejecucion-paso-comentario:${user.id}`, 30, 60_000);
+  if (!limite.permitido) {
+    return respuestaLimiteExcedido(limite.reintentarEnMs);
   }
 
   const { id } = await params;

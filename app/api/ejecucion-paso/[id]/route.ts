@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { registrarEvento } from "@/lib/auditoria";
 import { calcularEstadoEjecucion, esEstadoTerminal, esEstadoValido } from "@/lib/protocolos/estados";
+import { rateLimit, respuestaLimiteExcedido } from "@/lib/rateLimit";
 
 export async function PATCH(
   request: Request,
@@ -15,6 +16,13 @@ export async function PATCH(
 
   if (!user) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+  }
+
+  // 60/min: cubre el uso normal (marcar estado, notas al blur, evidencia)
+  // con margen, y frena un cliente que llame en loop por error o abuso.
+  const limite = rateLimit(`ejecucion-paso:${user.id}`, 60, 60_000);
+  if (!limite.permitido) {
+    return respuestaLimiteExcedido(limite.reintentarEnMs);
   }
 
   const { id } = await params;

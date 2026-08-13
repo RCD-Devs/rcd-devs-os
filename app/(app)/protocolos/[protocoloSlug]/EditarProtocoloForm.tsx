@@ -58,7 +58,6 @@ export function EditarProtocoloForm({
     } else {
       showToast(`Version v${numeroVersionVigente + 1} publicada`);
       router.push(`/protocolos/${protocoloSlug}`);
-      router.refresh();
     }
   }
 

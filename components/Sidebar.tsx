@@ -63,7 +63,7 @@ export function Sidebar({
           type="button"
           onClick={() => setOpen(true)}
           aria-label="Abrir menu"
-          className="flex size-9 items-center justify-center rounded-md text-text-muted hover:bg-bg hover:text-text"
+          className="flex size-9 items-center justify-center rounded-md text-text-muted hover:bg-surface-hover hover:text-text"
         >
           <Menu size={20} strokeWidth={2} />
         </button>
@@ -90,7 +90,7 @@ export function Sidebar({
             type="button"
             onClick={() => setOpen(false)}
             aria-label="Cerrar menu"
-            className="flex size-8 items-center justify-center rounded-md text-text-muted hover:bg-bg hover:text-text md:hidden"
+            className="flex size-8 items-center justify-center rounded-md text-text-muted hover:bg-surface-hover hover:text-text md:hidden"
           >
             <X size={18} strokeWidth={2} />
           </button>
@@ -106,7 +106,7 @@ export function Sidebar({
                 key={link.href}
                 href={link.href}
                 className={`flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                  active ? "bg-accent/10 text-accent" : "text-text-muted hover:bg-bg hover:text-text"
+                  active ? "bg-accent/10 text-accent" : "text-text-muted hover:bg-surface-hover hover:text-text"
                 }`}
               >
                 <Icon size={17} strokeWidth={2} />
@@ -122,7 +122,7 @@ export function Sidebar({
             className={`flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
               pathname === "/perfil"
                 ? "bg-accent/10 text-accent"
-                : "text-text-muted hover:bg-bg hover:text-text"
+                : "text-text-muted hover:bg-surface-hover hover:text-text"
             }`}
           >
             <User size={17} strokeWidth={2} />

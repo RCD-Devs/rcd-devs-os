@@ -1,7 +1,6 @@
 "use client";
 
 import { useId, useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
 import { Copy } from "lucide-react";
 import { crearUsuario } from "./actions";
 import { Input } from "@/components/ui/Input";
@@ -11,7 +10,6 @@ import { useToast } from "@/components/ui/Toast";
 import { generarPasswordTemporal } from "@/lib/passwordTemporal";
 
 export function InvitarUsuarioForm({ roles }: { roles: Array<{ id: string; nombre: string }> }) {
-  const router = useRouter();
   const { showToast } = useToast();
   const idBase = useId();
   const [email, setEmail] = useState("");
@@ -32,7 +30,6 @@ export function InvitarUsuarioForm({ roles }: { roles: Array<{ id: string; nombr
       showToast(`Cuenta creada. Contraseña: ${password}`);
       setEmail("");
       setPassword(generarPasswordTemporal());
-      router.refresh();
     }
     setLoading(false);
   }

@@ -144,7 +144,7 @@ export function EvidenciaField({
           disabled={disabled || subiendo}
           aria-label="Subir archivo de evidencia"
           title="Subir archivo"
-          className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border text-text-muted hover:bg-bg hover:text-text disabled:opacity-50"
+          className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border text-text-muted hover:bg-surface-hover hover:text-text disabled:opacity-50"
         >
           <Paperclip size={15} strokeWidth={2} />
         </button>

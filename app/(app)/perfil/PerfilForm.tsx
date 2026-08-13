@@ -1,14 +1,12 @@
 "use client";
 
 import { useId, useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
 import { actualizarPerfil } from "./actions";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
 
 export function PerfilForm({ nombreInicial }: { nombreInicial: string }) {
-  const router = useRouter();
   const { showToast } = useToast();
   const idBase = useId();
   const [nombre, setNombre] = useState(nombreInicial);
@@ -25,7 +23,6 @@ export function PerfilForm({ nombreInicial }: { nombreInicial: string }) {
       setError(result.error);
     } else {
       showToast("Perfil actualizado");
-      router.refresh();
     }
     setLoading(false);
   }

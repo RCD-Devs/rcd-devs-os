@@ -1,7 +1,6 @@
 "use client";
 
 import { useId, useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
 import { crearSolicitud } from "./actions";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
@@ -15,7 +14,6 @@ export function NuevaSolicitudForm({
   proyectos: Array<{ id: string; nombre: string }>;
   roles: Array<{ id: string; nombre: string }>;
 }) {
-  const router = useRouter();
   const { showToast } = useToast();
   const idBase = useId();
   const [proyectoId, setProyectoId] = useState(proyectos[0]?.id ?? "");
@@ -45,7 +43,6 @@ export function NuevaSolicitudForm({
       setDescripcion("");
       setSlaFechaLimite("");
       showToast("Solicitud creada");
-      router.refresh();
     }
     setLoading(false);
   }

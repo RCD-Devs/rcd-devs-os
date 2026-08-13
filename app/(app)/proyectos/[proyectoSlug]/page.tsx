@@ -14,6 +14,7 @@ import { calcularSemaforo, SEMAFORO_LABEL } from "@/lib/proyectos/semaforo";
 import { slugConId } from "@/lib/slug";
 import { getCurrentUser } from "@/lib/auth/getCurrentUser";
 import { esAdmin } from "@/lib/auth/esAdmin";
+import { getEtapas } from "@/lib/catalogos";
 
 export default async function ProyectoPage({
   params,
@@ -48,7 +49,7 @@ export default async function ProyectoPage({
   }
 
   const [etapas, protocolos, usuario] = await Promise.all([
-    prisma.etapa.findMany({ orderBy: { orden: "asc" } }),
+    getEtapas(),
     prisma.protocolo.findMany({ orderBy: { nombre: "asc" } }),
     getCurrentUser(),
   ]);

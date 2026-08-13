@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { Card } from "@/components/ui/Card";
 import { getCurrentUser } from "@/lib/auth/getCurrentUser";
 import { esAdmin } from "@/lib/auth/esAdmin";
+import { ExportarCsvButton } from "./ExportarCsvButton";
 
 // Ruta protegida por proxy.ts, depende de datos reales de Supabase: nunca
 // prerenderizar estaticamente (mismo criterio que /protocolos).
@@ -29,11 +30,16 @@ export default async function AuditoriaPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold tracking-tight text-text">Auditoría</h1>
-      <p className="mt-2 text-sm text-text-muted">
-        Registro append-only de cambios clave (últimos {LIMITE}). Solo lectura: no se puede editar
-        ni borrar desde la app.
-      </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-text">Auditoría</h1>
+          <p className="mt-2 text-sm text-text-muted">
+            Registro append-only de cambios clave (últimos {LIMITE}). Solo lectura: no se puede
+            editar ni borrar desde la app.
+          </p>
+        </div>
+        {eventos.length > 0 && <ExportarCsvButton eventos={eventos} />}
+      </div>
 
       {eventos.length === 0 ? (
         <p className="mt-6 text-sm text-text-muted">Todavia no hay eventos registrados.</p>

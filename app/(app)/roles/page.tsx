@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { RolRow } from "./RolRow";
 import { getCurrentUser } from "@/lib/auth/getCurrentUser";
 import { esAdmin } from "@/lib/auth/esAdmin";
+import { getRoles } from "@/lib/catalogos";
 
 // Ruta protegida por proxy.ts, depende de datos reales de Supabase: nunca
 // prerenderizar estaticamente (mismo criterio que /protocolos).
@@ -20,7 +21,7 @@ export default async function RolesPage() {
   }
 
   const [roles, usuarios] = await Promise.all([
-    prisma.rol.findMany({ orderBy: { nombre: "asc" } }),
+    getRoles(),
     prisma.usuario.findMany({ orderBy: { nombre: "asc" } }),
   ]);
 

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { Building2, CircleCheckBig, FolderKanban, ListChecks } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth/getCurrentUser";
 import { prisma } from "@/lib/prisma";
+import { getEtapas } from "@/lib/catalogos";
 import { BarChart } from "@/components/charts/BarChart";
 import { DoughnutChart } from "@/components/charts/DoughnutChart";
 import { ChartCard } from "@/components/ui/ChartCard";
@@ -34,7 +35,7 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const [proyectos, protocolos, clientesTotales, etapas] = await Promise.all([
+  const [proyectos, protocolos, clientesTotales, etapas, contactosAdmin] = await Promise.all([
     prisma.proyecto.findMany({
       include: {
         cliente: true,
@@ -47,7 +48,16 @@ export default async function DashboardPage() {
     }),
     prisma.protocolo.findMany({ orderBy: { nombre: "asc" } }),
     prisma.cliente.count(),
-    prisma.etapa.findMany({ orderBy: { orden: "asc" } }),
+    getEtapas(),
+    // Solo se consulta si hace falta (cuenta sin rol, ver mas abajo) para no
+    // pagar el join en el caso comun. No se puede condicionar el Promise.all
+    // en si (usuario ya esta resuelto arriba), asi que se filtra adentro.
+    usuario.rol
+      ? Promise.resolve([])
+      : prisma.rol.findMany({
+          where: { esAdmin: true, titularId: { not: null } },
+          select: { nombre: true, titular: { select: { nombre: true, email: true } } },
+        }),
   ]);
 
   const todasLasEjecuciones = proyectos.flatMap((p) => p.ejecucionesProtocolo);
@@ -74,9 +84,27 @@ export default async function DashboardPage() {
       </h1>
 
       {!usuario.rol && (
-        <p className="mt-2 text-sm text-text-muted">
-          Cuenta pendiente de configuracion, contacta a tu lider tecnico.
-        </p>
+        <div className="mt-2 text-sm text-text-muted">
+          <p>Tu cuenta todavía no tiene un rol asignado — algunas secciones van a estar limitadas.</p>
+          {contactosAdmin.length > 0 ? (
+            <p className="mt-1">
+              Pedile a{" "}
+              {contactosAdmin.map((rol, i) => (
+                <span key={rol.nombre}>
+                  {i > 0 && " o "}
+                  <span className="font-medium text-text">
+                    {rol.titular?.nombre ?? rol.titular?.email}
+                  </span>{" "}
+                  ({rol.nombre}
+                  {rol.titular?.nombre && `, ${rol.titular.email}`})
+                </span>
+              ))}{" "}
+              que te asigne uno.
+            </p>
+          ) : (
+            <p className="mt-1">Pedile a Líder técnico o Director/a que te asigne uno.</p>
+          )}
+        </div>
       )}
 
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">

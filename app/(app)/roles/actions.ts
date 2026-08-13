@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { registrarEvento } from "@/lib/auditoria";
 import { getCurrentUser } from "@/lib/auth/getCurrentUser";
@@ -43,7 +43,14 @@ export async function actualizarAsignacionRol(
     detalle: { campo, usuarioId },
   });
 
+  // revalidatePath ya fuerza que /roles (esta pantalla) muestre el cambio de
+  // inmediato en la misma respuesta. revalidateTag con perfil "max" es
+  // stale-while-revalidate para el resto de las paginas que leen getRoles()
+  // (/usuarios, /solicitudes): pueden servir el valor viejo una vista mas
+  // antes de refrescar en segundo plano -- aceptable, los roles casi no
+  // cambian.
   revalidatePath("/roles");
+  revalidateTag("roles", "max");
 
   return ok(null);
 }
@@ -63,6 +70,7 @@ export async function actualizarEsAdminRol(rolId: string, valor: boolean): Promi
   });
 
   revalidatePath("/roles");
+  revalidateTag("roles", "max");
 
   return ok(null);
 }

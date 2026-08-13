@@ -5,6 +5,7 @@ import { InvitarUsuarioForm } from "./InvitarUsuarioForm";
 import { UsuarioRow } from "./UsuarioRow";
 import { getCurrentUser } from "@/lib/auth/getCurrentUser";
 import { esAdmin } from "@/lib/auth/esAdmin";
+import { getRoles } from "@/lib/catalogos";
 
 // Ruta protegida por proxy.ts, depende de datos reales de Supabase: nunca
 // prerenderizar estaticamente (mismo criterio que /protocolos).
@@ -23,7 +24,7 @@ export default async function UsuariosPage() {
 
   const [usuarios, roles] = await Promise.all([
     prisma.usuario.findMany({ orderBy: { email: "asc" } }),
-    prisma.rol.findMany({ orderBy: { nombre: "asc" } }),
+    getRoles(),
   ]);
 
   const invitacionesHabilitadas = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY);

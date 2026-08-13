@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { Card } from "@/components/ui/Card";
 import { NuevaSolicitudForm } from "./NuevaSolicitudForm";
 import { SolicitudRow } from "./SolicitudRow";
+import { getRoles } from "@/lib/catalogos";
 
 // Ruta protegida por proxy.ts, depende de datos reales de Supabase: nunca
 // prerenderizar estaticamente (mismo criterio que /protocolos).
@@ -14,7 +15,7 @@ export default async function SolicitudesPage() {
       orderBy: { createdAt: "desc" },
     }),
     prisma.proyecto.findMany({ orderBy: { nombre: "asc" } }),
-    prisma.rol.findMany({ orderBy: { nombre: "asc" } }),
+    getRoles(),
   ]);
 
   return (

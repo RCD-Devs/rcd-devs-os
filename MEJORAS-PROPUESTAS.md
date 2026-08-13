@@ -87,9 +87,9 @@ Se va tildando a medida que se implementa.
 - [x] #24 Validación de tamaño/tipo de archivo en el upload de evidencia
 - [x] #18 Más tests unitarios en funciones puras (`slug.ts`, `actionResult.ts`) — el doc decía "ni un solo `.test.ts` en el repo", ya no era exacto (`lib/protocolos/estados.test.ts` existía). Sigue faltando cobertura de `lib/proyectos/semaforo.ts` y de la capa de Server Actions.
 - [ ] #4 Modo oscuro con toggle manual
-- [ ] #6 Onboarding para cuenta sin rol (mostrar titulares de Líder técnico/Director·a)
-- [ ] #33 Exportar auditoría a CSV
-- [ ] #28 Cachear catálogos casi estáticos (Etapas, Roles)
+- [x] #6 Onboarding para cuenta sin rol (mostrar titulares de Líder técnico/Director·a)
+- [x] #33 Exportar auditoría a CSV
+- [x] #28 Cachear catálogos casi estáticos (Etapas, Roles)
 
 **Tier 3 — medio (puede tocar schema o agregar una vista nueva)**
 - [ ] #12 Duplicar protocolo
@@ -129,7 +129,7 @@ Propuestas propias, agrupadas por área. Ninguna depende de JIRA. El check indic
 2. **Buscador global (Cmd/Ctrl+K)** — un solo cuadro que busque a la vez en proyectos, protocolos, clientes y solicitudes, en vez de tres buscadores independientes por vista.
 3. **Pantalla de error propia** (`error.tsx` de Next.js) — hoy un error no controlado muestra el mensaje crudo de Next con el `digest`; una pantalla con "algo salió mal, reintentar" es más apropiada para usuarios no técnicos.
 4. **Modo oscuro con toggle manual** — hoy solo sigue la preferencia del sistema operativo; útil si alguien quiere forzarlo independiente del SO.
-6. **Onboarding para cuenta sin rol** — hoy el mensaje es un párrafo de texto ("cuenta pendiente de configuración"); podría mostrar directo a quién contactar (los titulares de "Líder técnico"/"Director/a" ya están en la tabla `Rol`).
+6. ✅ **Onboarding para cuenta sin rol** — el dashboard ahora muestra el nombre/correo de los titulares de los roles admin (`esAdmin: true`) en vez de un párrafo genérico. Si ningún rol admin tiene titular asignado, cae al texto genérico "Líder técnico o Director/a".
 7. **Auditoría con filtro de fecha/usuario/entidad** — hoy `/auditoria` solo muestra los últimos 100 eventos sin poder acotar por rango o buscar por persona.
 8. **Revisión de accesibilidad con una herramienta tipo axe** — contraste de colores en tema oscuro y navegación 100% por teclado no se probaron formalmente.
 
@@ -163,7 +163,7 @@ Propuestas propias, agrupadas por área. Ninguna depende de JIRA. El check indic
 
 ### Performance e infraestructura
 
-28. **Cachear catálogos que casi no cambian** (Etapas, Roles) — hoy cada página con `force-dynamic` los vuelve a consultar completos en cada request; son datos que cambian con muy poca frecuencia.
+28. ✅ **Cachear catálogos que casi no cambian** (Etapas, Roles) — `lib/catalogos.ts` (`unstable_cache`, no la nueva directiva `"use cache"`/Cache Components: es de opt-in global y más riesgo de tocar el resto de las páginas `force-dynamic`). Etapas cachea indefinido (sin mutación en la app); Roles se invalida con `revalidateTag("roles", "max")` desde `/roles/actions.ts` cuando se edita.
 29. **Suspense granular en páginas pesadas** — `/alertas` calcula el semáforo de *todos* los proyectos antes de poder mostrar nada; con `<Suspense>` por sección se podría mostrar el layout de inmediato y las alertas a medida que están listas.
 30. **Habilitar Speed Insights / Web Analytics en Vercel** — estaban deshabilitados durante todo este debugging; sin eso, un problema de latencia real solo se nota cuando alguien se queja, no antes.
 31. **Revisar el tamaño del connection pool de `pg`** (`@prisma/adapter-pg`) para el entorno serverless — hoy usa la configuración por default; vale la pena revisar si conviene un `max` más chico dado que cada función serverless ya pasa por el pooler de Supabase (pgbouncer).
@@ -171,6 +171,6 @@ Propuestas propias, agrupadas por área. Ninguna depende de JIRA. El check indic
 ### Reportería / negocio
 
 32. **Dashboard de cumplimiento por cliente** — hoy el % de protocolos completos se ve por proyecto individual, no agregado por cliente (útil para una reunión de cuenta).
-33. **Exportar auditoría a CSV** — para reportes de compliance que alguien pueda abrir en Excel sin depender de la UI.
+33. ✅ **Exportar auditoría a CSV** — botón client-side en `/auditoria` (con BOM UTF-8 para que Excel no rompa tildes). Exporta los últimos 100 eventos cargados en la página, no toda la tabla histórica.
 34. **Métricas de tiempo por protocolo** — cuánto tarda en promedio un protocolo en completarse, por tipo de protocolo; sirve para estimar mejor futuros proyectos.
 35. **Exportar el dashboard completo a PDF**, no solo un checklist individual — un snapshot de "estado de todos los proyectos" para compartir en una reunión.

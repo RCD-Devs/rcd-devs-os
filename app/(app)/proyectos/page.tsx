@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { Card } from "@/components/ui/Card";
 import { NuevoProyectoForm } from "./NuevoProyectoForm";
 import { ProyectosList } from "./ProyectosList";
+import { getEtapas } from "@/lib/catalogos";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +17,7 @@ export default async function ProyectosPage() {
       orderBy: { nombre: "asc" },
     }),
     prisma.cliente.findMany({ orderBy: { nombre: "asc" } }),
-    prisma.etapa.findMany({ orderBy: { orden: "asc" } }),
+    getEtapas(),
   ]);
 
   return (

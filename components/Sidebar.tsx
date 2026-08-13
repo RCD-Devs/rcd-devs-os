@@ -13,6 +13,7 @@ import {
   LayoutDashboard,
   Menu,
   User,
+  UserCog,
   Users,
   X,
 } from "lucide-react";
@@ -26,8 +27,9 @@ const NAV_LINKS = [
   { href: "/clientes", label: "Clientes", icon: Building2, adminOnly: false },
   { href: "/solicitudes", label: "Solicitudes", icon: Inbox, adminOnly: false },
   { href: "/auditoria", label: "Auditoría", icon: History, adminOnly: false },
-  // Solo Lider tecnico y Director/a (Rol.esAdmin): roles y configuracion de
-  // permisos, no el resto de la operacion diaria.
+  // Solo Lider tecnico y Director/a (Rol.esAdmin): roles, usuarios y
+  // configuracion de permisos, no el resto de la operacion diaria.
+  { href: "/usuarios", label: "Usuarios", icon: UserCog, adminOnly: true },
   { href: "/roles", label: "Roles", icon: Users, adminOnly: true },
 ];
 

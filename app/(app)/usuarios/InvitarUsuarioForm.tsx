@@ -23,15 +23,20 @@ export function InvitarUsuarioForm({ roles }: { roles: Array<{ id: string; nombr
     setLoading(true);
     setError(null);
 
-    const result = await crearUsuario(email, password, rolId);
-    if (!result.ok) {
-      setError(result.error);
-    } else {
-      showToast(`Cuenta creada. Contraseña: ${password}`);
-      setEmail("");
-      setPassword(generarPasswordTemporal());
+    try {
+      const result = await crearUsuario(email, password, rolId);
+      if (!result.ok) {
+        setError(result.error);
+      } else {
+        showToast(`Cuenta creada. Contraseña: ${password}`);
+        setEmail("");
+        setPassword(generarPasswordTemporal());
+      }
+    } catch {
+      setError("Ocurrio un error inesperado, intenta de nuevo");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   function copiarPassword() {

@@ -45,13 +45,18 @@ export function NuevoProtocoloForm() {
     setLoading(true);
     setError(null);
 
-    const result = await crearProtocolo({ nombre, objetivo, alcance, pasos });
-    if (!result.ok) {
-      setLoading(false);
-      setError(result.error);
-    } else {
-      router.push(`/protocolos/${slugify(result.data.nombre)}`);
+    try {
+      const result = await crearProtocolo({ nombre, objetivo, alcance, pasos });
+      if (!result.ok) {
+        setError(result.error);
+      } else {
+        router.push(`/protocolos/${slugify(result.data.nombre)}`);
+        return;
+      }
+    } catch {
+      setError("Ocurrio un error inesperado, intenta de nuevo");
     }
+    setLoading(false);
   }
 
   return (

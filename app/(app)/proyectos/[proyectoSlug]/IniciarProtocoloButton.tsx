@@ -19,21 +19,25 @@ export function IniciarProtocoloButton({
     setLoading(true);
     setError(null);
 
-    const res = await fetch("/api/ejecucion-protocolo", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ proyectoId, protocoloId }),
-    });
+    try {
+      const res = await fetch("/api/ejecucion-protocolo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ proyectoId, protocoloId }),
+      });
 
-    setLoading(false);
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setError(data?.error ?? "No se pudo iniciar el protocolo");
+        return;
+      }
 
-    if (!res.ok) {
-      const data = await res.json().catch(() => null);
-      setError(data?.error ?? "No se pudo iniciar el protocolo");
-      return;
+      router.refresh();
+    } catch {
+      setError("Ocurrio un error inesperado, intenta de nuevo");
+    } finally {
+      setLoading(false);
     }
-
-    router.refresh();
   }
 
   return (

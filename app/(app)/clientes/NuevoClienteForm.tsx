@@ -32,21 +32,26 @@ export function NuevoClienteForm() {
     setLoading(true);
     setError(null);
 
-    const result = await crearCliente({
-      nombre,
-      contactoNombre,
-      contactoEmail,
-      contactoTelefono,
-      rubro,
-      sitioWeb,
-      notas,
-    });
-    if (!result.ok) {
-      setError(result.error);
-    } else {
-      limpiar();
+    try {
+      const result = await crearCliente({
+        nombre,
+        contactoNombre,
+        contactoEmail,
+        contactoTelefono,
+        rubro,
+        sitioWeb,
+        notas,
+      });
+      if (!result.ok) {
+        setError(result.error);
+      } else {
+        limpiar();
+      }
+    } catch {
+      setError("Ocurrio un error inesperado, intenta de nuevo");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   return (

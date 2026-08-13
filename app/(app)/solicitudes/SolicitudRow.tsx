@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { MessageSquare } from "lucide-react";
-import { actualizarEstadoSolicitud, agregarComentarioSolicitud, ESTADOS_SOLICITUD } from "./actions";
+import { actualizarEstadoSolicitud, agregarComentarioSolicitud } from "./actions";
+import { ESTADOS_SOLICITUD } from "./estados";
 import { Card } from "@/components/ui/Card";
 import { Select } from "@/components/ui/Select";
 import { Input } from "@/components/ui/Input";

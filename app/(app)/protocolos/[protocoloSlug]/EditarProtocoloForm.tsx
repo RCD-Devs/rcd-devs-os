@@ -51,13 +51,18 @@ export function EditarProtocoloForm({
     setLoading(true);
     setError(null);
 
-    const result = await crearNuevaVersionProtocolo(protocoloId, pasos);
-    if (!result.ok) {
-      setError(result.error);
+    try {
+      const result = await crearNuevaVersionProtocolo(protocoloId, pasos);
+      if (!result.ok) {
+        setError(result.error);
+        setLoading(false);
+      } else {
+        showToast(`Version v${numeroVersionVigente + 1} publicada`);
+        router.push(`/protocolos/${protocoloSlug}`);
+      }
+    } catch {
+      setError("Ocurrio un error inesperado, intenta de nuevo");
       setLoading(false);
-    } else {
-      showToast(`Version v${numeroVersionVigente + 1} publicada`);
-      router.push(`/protocolos/${protocoloSlug}`);
     }
   }
 

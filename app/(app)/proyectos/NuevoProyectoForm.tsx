@@ -28,13 +28,18 @@ export function NuevoProyectoForm({
     setLoading(true);
     setError(null);
 
-    const result = await crearProyecto({ nombre, clienteId, etapaActualId });
-    if (!result.ok) {
-      setLoading(false);
-      setError(result.error);
-    } else {
-      router.push(`/proyectos/${slugConId(result.data.nombre, result.data.id)}`);
+    try {
+      const result = await crearProyecto({ nombre, clienteId, etapaActualId });
+      if (!result.ok) {
+        setError(result.error);
+      } else {
+        router.push(`/proyectos/${slugConId(result.data.nombre, result.data.id)}`);
+        return;
+      }
+    } catch {
+      setError("Ocurrio un error inesperado, intenta de nuevo");
     }
+    setLoading(false);
   }
 
   if (clientes.length === 0) {

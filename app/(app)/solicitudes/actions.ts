@@ -5,8 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { registrarEvento } from "@/lib/auditoria";
 import { ok, fail, type ActionResult } from "@/lib/actionResult";
-
-export const ESTADOS_SOLICITUD = ["Pendiente", "En curso", "Resuelta", "Rechazada"];
+import { ESTADOS_SOLICITUD } from "./estados";
 
 export async function crearSolicitud(input: {
   proyectoId: string;

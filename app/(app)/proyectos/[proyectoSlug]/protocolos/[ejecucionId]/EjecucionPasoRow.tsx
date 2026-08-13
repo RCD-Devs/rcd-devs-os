@@ -71,24 +71,30 @@ export function EjecucionPasoRow({
     setSaving(true);
     setError(null);
 
-    const res = await fetch(`/api/ejecucion-paso/${paso.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(cambios),
-    });
+    try {
+      const res = await fetch(`/api/ejecucion-paso/${paso.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(cambios),
+      });
 
-    setSaving(false);
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        const mensaje = data?.error ?? "No se pudo guardar el cambio";
+        setError(mensaje);
+        showToast(mensaje, "error");
+        return;
+      }
 
-    if (!res.ok) {
-      const data = await res.json().catch(() => null);
-      const mensaje = data?.error ?? "No se pudo guardar el cambio";
+      showToast("Guardado");
+      router.refresh();
+    } catch {
+      const mensaje = "Ocurrio un error inesperado, intenta de nuevo";
       setError(mensaje);
       showToast(mensaje, "error");
-      return;
+    } finally {
+      setSaving(false);
     }
-
-    showToast("Guardado");
-    router.refresh();
   }
 
   async function enviarComentario() {
@@ -96,21 +102,26 @@ export function EjecucionPasoRow({
     if (!texto) return;
 
     setEnviandoComentario(true);
-    const res = await fetch(`/api/ejecucion-paso/${paso.id}/comentarios`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ texto }),
-    });
-    setEnviandoComentario(false);
+    try {
+      const res = await fetch(`/api/ejecucion-paso/${paso.id}/comentarios`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ texto }),
+      });
 
-    if (!res.ok) {
-      const data = await res.json().catch(() => null);
-      showToast(data?.error ?? "No se pudo agregar el comentario", "error");
-      return;
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        showToast(data?.error ?? "No se pudo agregar el comentario", "error");
+        return;
+      }
+
+      setNuevoComentario("");
+      router.refresh();
+    } catch {
+      showToast("Ocurrio un error inesperado, intenta de nuevo", "error");
+    } finally {
+      setEnviandoComentario(false);
     }
-
-    setNuevoComentario("");
-    router.refresh();
   }
 
   return (

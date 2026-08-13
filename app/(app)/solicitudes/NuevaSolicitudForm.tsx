@@ -29,22 +29,30 @@ export function NuevaSolicitudForm({
     setLoading(true);
     setError(null);
 
-    const result = await crearSolicitud({
-      proyectoId,
-      tipo,
-      descripcion,
-      responsableRolId,
-      slaFechaLimite,
-    });
-    if (!result.ok) {
-      setError(result.error);
-    } else {
-      setTipo("");
-      setDescripcion("");
-      setSlaFechaLimite("");
-      showToast("Solicitud creada");
+    try {
+      const result = await crearSolicitud({
+        proyectoId,
+        tipo,
+        descripcion,
+        responsableRolId,
+        slaFechaLimite,
+      });
+      if (!result.ok) {
+        setError(result.error);
+      } else {
+        setTipo("");
+        setDescripcion("");
+        setSlaFechaLimite("");
+        showToast("Solicitud creada");
+      }
+    } catch {
+      // Un error no controlado (500, red caida) no debe dejar el boton
+      // pegado en "Creando..." para siempre: sin este catch, una excepcion
+      // ademas del texto amarra el estado a loading=true de por vida.
+      setError("Ocurrio un error inesperado, intenta de nuevo");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   if (proyectos.length === 0 || roles.length === 0) {

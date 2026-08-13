@@ -58,20 +58,24 @@ export function AdjuntosPaso({
   const [error, setError] = useState<string | null>(null);
 
   async function agregar(valor: string) {
-    const res = await fetch(`/api/ejecucion-paso/${pasoId}/evidencias`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ valor }),
-    });
+    try {
+      const res = await fetch(`/api/ejecucion-paso/${pasoId}/evidencias`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ valor }),
+      });
 
-    if (!res.ok) {
-      const data = await res.json().catch(() => null);
-      setError(data?.error ?? "No se pudo agregar el adjunto");
-      return;
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setError(data?.error ?? "No se pudo agregar el adjunto");
+        return;
+      }
+
+      setError(null);
+      onCambio();
+    } catch {
+      setError("Ocurrio un error inesperado, intenta de nuevo");
     }
-
-    setError(null);
-    onCambio();
   }
 
   async function agregarLink() {
@@ -89,37 +93,46 @@ export function AdjuntosPaso({
     }
 
     setSubiendo(true);
-    const supabase = createClient();
-    const objectPath = `${pasoId}/${Date.now()}-${file.name}`;
-    const { error: errorUpload } = await supabase.storage
-      .from(BUCKET_EVIDENCIA)
-      .upload(objectPath, file);
+    try {
+      const supabase = createClient();
+      const objectPath = `${pasoId}/${Date.now()}-${file.name}`;
+      const { error: errorUpload } = await supabase.storage
+        .from(BUCKET_EVIDENCIA)
+        .upload(objectPath, file);
 
-    if (errorUpload) {
+      if (errorUpload) {
+        setError("No se pudo subir el archivo");
+        return;
+      }
+
+      await agregar(`${PREFIJO_STORAGE}${objectPath}`);
+    } catch {
+      setError("Ocurrio un error inesperado, intenta de nuevo");
+    } finally {
       setSubiendo(false);
-      setError("No se pudo subir el archivo");
-      return;
     }
-
-    await agregar(`${PREFIJO_STORAGE}${objectPath}`);
-    setSubiendo(false);
   }
 
   async function eliminar(evidenciaId: string) {
     setEliminandoId(evidenciaId);
-    const res = await fetch(`/api/ejecucion-paso/${pasoId}/evidencias/${evidenciaId}`, {
-      method: "DELETE",
-    });
-    setEliminandoId(null);
+    try {
+      const res = await fetch(`/api/ejecucion-paso/${pasoId}/evidencias/${evidenciaId}`, {
+        method: "DELETE",
+      });
 
-    if (!res.ok) {
-      const data = await res.json().catch(() => null);
-      setError(data?.error ?? "No se pudo quitar el adjunto");
-      return;
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setError(data?.error ?? "No se pudo quitar el adjunto");
+        return;
+      }
+
+      setError(null);
+      onCambio();
+    } catch {
+      setError("Ocurrio un error inesperado, intenta de nuevo");
+    } finally {
+      setEliminandoId(null);
     }
-
-    setError(null);
-    onCambio();
   }
 
   return (

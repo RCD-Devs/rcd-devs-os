@@ -3,7 +3,7 @@
 :root {
   --color-bg: #fafafa;
   --color-surface: #ffffff;
-  --color-surface-hover: #eeeeee;
+  --color-surface-hover: #e2e2e2;
   --color-border: #e5e5e5;
   --color-text: #171717;
   --color-text-muted: #6b6b6b;
@@ -73,7 +73,7 @@
   :root:not([data-theme="light"]) {
     --color-bg: #0a0a0a;
     --color-surface: #141414;
-    --color-surface-hover: #262626;
+    --color-surface-hover: #363636;
     --color-border: #2a2a2a;
     --color-text: #ededed;
     --color-text-muted: #a1a1a1;

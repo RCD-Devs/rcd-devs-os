@@ -18,13 +18,18 @@ export function PerfilForm({ nombreInicial }: { nombreInicial: string }) {
     setLoading(true);
     setError(null);
 
-    const result = await actualizarPerfil(nombre);
-    if (!result.ok) {
-      setError(result.error);
-    } else {
-      showToast("Perfil actualizado");
+    try {
+      const result = await actualizarPerfil(nombre);
+      if (!result.ok) {
+        setError(result.error);
+      } else {
+        showToast("Perfil actualizado");
+      }
+    } catch {
+      setError("Ocurrio un error inesperado, intenta de nuevo");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   return (

@@ -14,16 +14,19 @@ export function DuplicarProtocoloButton({ protocoloId }: { protocoloId: string }
 
   async function duplicar() {
     setLoading(true);
-    const result = await duplicarProtocolo(protocoloId);
-    setLoading(false);
-
-    if (!result.ok) {
-      showToast(result.error, "error");
-      return;
+    try {
+      const result = await duplicarProtocolo(protocoloId);
+      if (!result.ok) {
+        showToast(result.error, "error");
+        return;
+      }
+      showToast(`Creado "${result.data.nombre}" — edítalo a gusto`);
+      router.push(`/protocolos/${slugify(result.data.nombre)}/editar`);
+    } catch {
+      showToast("Ocurrio un error inesperado, intenta de nuevo", "error");
+    } finally {
+      setLoading(false);
     }
-
-    showToast(`Creado "${result.data.nombre}" — edítalo a gusto`);
-    router.push(`/protocolos/${slugify(result.data.nombre)}/editar`);
   }
 
   return (

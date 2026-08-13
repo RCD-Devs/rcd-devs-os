@@ -35,21 +35,26 @@ export function EditarClienteForm({ cliente }: { cliente: ClienteData }) {
     setLoading(true);
     setError(null);
 
-    const result = await actualizarCliente(cliente.id, {
-      nombre,
-      contactoNombre,
-      contactoEmail,
-      contactoTelefono,
-      rubro,
-      sitioWeb,
-      notas,
-    });
-    if (!result.ok) {
-      setError(result.error);
-    } else {
-      showToast("Cliente actualizado");
+    try {
+      const result = await actualizarCliente(cliente.id, {
+        nombre,
+        contactoNombre,
+        contactoEmail,
+        contactoTelefono,
+        rubro,
+        sitioWeb,
+        notas,
+      });
+      if (!result.ok) {
+        setError(result.error);
+      } else {
+        showToast("Cliente actualizado");
+      }
+    } catch {
+      setError("Ocurrio un error inesperado, intenta de nuevo");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   return (

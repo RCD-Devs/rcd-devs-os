@@ -1,15 +1,20 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
+// Driver adapters (@prisma/adapter-pg): la conexion a Postgres la maneja el
+// driver "pg" en JS, no el motor nativo de Prisma (Rust/.so.node). Se cambio
+// a esto despues de 3 intentos fallidos de empaquetar el binario nativo
+// correctamente en Vercel (outputFileTracingIncludes, binaryTargets, glob
+// recursivo — el error PrismaClientInitializationError persistia en
+// produccion pese a verificarse localmente). Sin motor nativo que
+// desplegar, esta clase de problema desaparece por completo.
 generator client {
-  provider      = "prisma-client"
-  output        = "../app/generated/prisma"
-  // "native" cubre la maquina donde se corre `prisma generate` (Windows en
-  // local); "rhel-openssl-3.0.x" es el runtime real de las funciones
-  // serverless de Vercel (Amazon Linux 2023), distinto al SO del build. Sin
-  // este segundo target el motor nunca se genera y las queries fallan en
-  // produccion con PrismaClientInitializationError.
-  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+  provider   = "prisma-client"
+  output     = "../app/generated/prisma"
+  // Sin esto, el generador sigue emitiendo el motor binario nativo aunque
+  // se use un driver adapter en runtime. "client" cambia al compilador de
+  // queries en JS/WASM, sin binario especifico por plataforma/OS.
+  engineType = "client"
 }
 
 datasource db {

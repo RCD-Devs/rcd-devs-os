@@ -1,13 +1,16 @@
 import Link from "next/link";
-import { ChevronLeft, FolderKanban } from "lucide-react";
+import { CircleCheckBig, ChevronLeft, FolderKanban, ListChecks, Percent } from "lucide-react";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { Card } from "@/components/ui/Card";
 import { EtapaBadge } from "@/components/ui/EtapaBadge";
+import { ProgressBar } from "@/components/ui/ProgressBar";
+import { StatCard } from "@/components/ui/StatCard";
 import { EditarClienteForm } from "./EditarClienteForm";
 import { EliminarClienteButton } from "./EliminarClienteButton";
 import { getCurrentUser } from "@/lib/auth/getCurrentUser";
 import { esAdmin } from "@/lib/auth/esAdmin";
+import { contarProgreso } from "@/lib/protocolos/estados";
 import { slugConId } from "@/lib/slug";
 
 // Ruta protegida por proxy.ts, depende de datos reales de Supabase: nunca
@@ -24,7 +27,12 @@ export default async function ClienteDetallePage({
   const [cliente, usuario] = await Promise.all([
     prisma.cliente.findUnique({
       where: { id: clienteId },
-      include: { proyectos: { include: { etapaActual: true }, orderBy: { nombre: "asc" } } },
+      include: {
+        proyectos: {
+          include: { etapaActual: true, ejecucionesProtocolo: { include: { pasos: true } } },
+          orderBy: { nombre: "asc" },
+        },
+      },
     }),
     getCurrentUser(),
   ]);
@@ -32,6 +40,22 @@ export default async function ClienteDetallePage({
   if (!cliente) {
     notFound();
   }
+
+  // Cumplimiento agregado del cliente: no es el promedio de los % de cada
+  // proyecto (eso pesa igual un proyecto de 2 pasos que uno de 40), es la
+  // suma de pasos completos sobre la suma de pasos totales de todos sus
+  // proyectos — asi un proyecto grande pesa lo que corresponde.
+  const proyectosConProgreso = cliente.proyectos.map((proyecto) => ({
+    proyecto,
+    progreso: contarProgreso(proyecto.ejecucionesProtocolo.flatMap((e) => e.pasos)),
+  }));
+  const totalPasos = proyectosConProgreso.reduce((acc, p) => acc + p.progreso.total, 0);
+  const pasosCompletos = proyectosConProgreso.reduce((acc, p) => acc + p.progreso.completos, 0);
+  const pctCumplimiento = totalPasos === 0 ? 0 : Math.round((pasosCompletos / totalPasos) * 100);
+
+  const todasLasEjecuciones = cliente.proyectos.flatMap((p) => p.ejecucionesProtocolo);
+  const protocolosCompletos = todasLasEjecuciones.filter((e) => e.estado === "Completo").length;
+  const protocolosEnCurso = todasLasEjecuciones.filter((e) => e.estado !== "Completo").length;
 
   return (
     <div>
@@ -49,25 +73,51 @@ export default async function ClienteDetallePage({
         <EditarClienteForm cliente={cliente} />
       </Card>
 
+      {cliente.proyectos.length > 0 && (
+        <>
+          <h2 className="mt-8 text-xs font-semibold uppercase tracking-wide text-text-muted">
+            Cumplimiento
+          </h2>
+          <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <StatCard label="Proyectos" value={cliente.proyectos.length} icon={FolderKanban} tone={1} />
+            <StatCard
+              label="Protocolos completos"
+              value={protocolosCompletos}
+              icon={CircleCheckBig}
+              tone={2}
+            />
+            <StatCard label="Protocolos en curso" value={protocolosEnCurso} icon={ListChecks} tone={4} />
+            <StatCard label="% pasos completos" value={pctCumplimiento} icon={Percent} tone={3} />
+          </div>
+        </>
+      )}
+
       <h2 className="mt-8 text-xs font-semibold uppercase tracking-wide text-text-muted">
         Proyectos ({cliente.proyectos.length})
       </h2>
-      {cliente.proyectos.length === 0 ? (
+      {proyectosConProgreso.length === 0 ? (
         <p className="mt-3 text-sm text-text-muted">Todavia no tiene proyectos.</p>
       ) : (
         <ul className="mt-3 space-y-2">
-          {cliente.proyectos.map((proyecto) => (
+          {proyectosConProgreso.map(({ proyecto, progreso }) => (
             <li key={proyecto.id}>
               <Link href={`/proyectos/${slugConId(proyecto.nombre, proyecto.id)}`}>
-                <Card className="flex items-center justify-between gap-3 transition-colors hover:border-accent">
+                <Card className="flex flex-wrap items-center justify-between gap-3 transition-colors hover:border-accent">
                   <span className="flex items-center gap-2 font-medium">
                     <FolderKanban size={14} strokeWidth={2} className="text-text-muted" />
                     {proyecto.nombre}
                   </span>
-                  <EtapaBadge
-                    nombre={proyecto.etapaActual.nombre}
-                    orden={proyecto.etapaActual.orden}
-                  />
+                  <div className="flex items-center gap-3">
+                    {progreso.total > 0 ? (
+                      <ProgressBar value={progreso.completos} max={progreso.total} />
+                    ) : (
+                      <span className="font-mono text-xs text-text-muted">sin protocolos</span>
+                    )}
+                    <EtapaBadge
+                      nombre={proyecto.etapaActual.nombre}
+                      orden={proyecto.etapaActual.orden}
+                    />
+                  </div>
                 </Card>
               </Link>
             </li>

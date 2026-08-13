@@ -8,20 +8,14 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
-
-function generarPassword() {
-  const alfabeto = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
-  const bytes = new Uint32Array(12);
-  crypto.getRandomValues(bytes);
-  return Array.from(bytes, (b) => alfabeto[b % alfabeto.length]).join("");
-}
+import { generarPasswordTemporal } from "@/lib/passwordTemporal";
 
 export function InvitarUsuarioForm({ roles }: { roles: Array<{ id: string; nombre: string }> }) {
   const router = useRouter();
   const { showToast } = useToast();
   const idBase = useId();
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState(() => generarPassword());
+  const [password, setPassword] = useState(() => generarPasswordTemporal());
   const [rolId, setRolId] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +29,7 @@ export function InvitarUsuarioForm({ roles }: { roles: Array<{ id: string; nombr
       await crearUsuario(email, password, rolId);
       showToast(`Cuenta creada. Contraseña: ${password}`);
       setEmail("");
-      setPassword(generarPassword());
+      setPassword(generarPasswordTemporal());
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo crear el usuario");

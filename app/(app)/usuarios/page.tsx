@@ -58,7 +58,11 @@ export default async function UsuariosPage() {
         <ul className="mt-6 space-y-3">
           {usuarios.map((usuario) => (
             <li key={usuario.id}>
-              <UsuarioRow usuario={usuario} roles={roles} />
+              <UsuarioRow
+                usuario={usuario}
+                roles={roles}
+                esUsuarioActual={usuario.id === usuarioActual.id}
+              />
             </li>
           ))}
         </ul>

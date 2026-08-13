@@ -7,6 +7,9 @@ import { EstadoBadge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { slugConId, slugify } from "@/lib/slug";
 import { TONE_BG_TEXT, toneFromString } from "@/lib/ui/tone";
+import { getCurrentUser } from "@/lib/auth/getCurrentUser";
+import { puedeCrear } from "@/lib/auth/permisos";
+import { DuplicarProtocoloButton } from "./DuplicarProtocoloButton";
 
 export default async function ProtocoloDetallePage({
   params,
@@ -25,7 +28,7 @@ export default async function ProtocoloDetallePage({
     notFound();
   }
 
-  const [protocolo, ejecuciones] = await Promise.all([
+  const [protocolo, ejecuciones, usuario] = await Promise.all([
     prisma.protocolo.findUnique({
       where: { id: protocoloId },
       include: {
@@ -36,7 +39,9 @@ export default async function ProtocoloDetallePage({
       where: { versionProtocolo: { protocoloId } },
       include: { proyecto: { include: { cliente: true } } },
     }),
+    getCurrentUser(),
   ]);
+  const puedeCrearProtocolos = await puedeCrear(usuario, "protocolos");
 
   if (!protocolo) {
     notFound();
@@ -112,13 +117,16 @@ export default async function ProtocoloDetallePage({
           Checklist de referencia (v{versionVigente?.numeroVersion ?? "-"})
         </h2>
         {versionVigente && (
-          <Link
-            href={`/protocolos/${protocoloSlug}/editar`}
-            className="flex items-center gap-1 text-xs text-accent hover:underline"
-          >
-            <Pencil size={12} strokeWidth={2} />
-            Editar
-          </Link>
+          <div className="flex items-center gap-4">
+            {puedeCrearProtocolos && <DuplicarProtocoloButton protocoloId={protocolo.id} />}
+            <Link
+              href={`/protocolos/${protocoloSlug}/editar`}
+              className="flex items-center gap-1 text-xs text-accent hover:underline"
+            >
+              <Pencil size={12} strokeWidth={2} />
+              Editar
+            </Link>
+          </div>
         )}
       </div>
 

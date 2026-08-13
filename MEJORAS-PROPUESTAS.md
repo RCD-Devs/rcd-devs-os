@@ -93,7 +93,7 @@ Se va tildando a medida que se implementa.
 - [x] #28 Cachear catálogos casi estáticos (Etapas, Roles)
 
 **Tier 3 — medio (puede tocar schema o agregar una vista nueva)**
-- [ ] #12 Duplicar protocolo
+- [x] #12 Duplicar protocolo
 - [ ] #7 Auditoría con filtro de fecha/usuario/entidad
 - [ ] #15 Archivar proyectos completados
 - [ ] #1 Paginación en listas largas
@@ -139,7 +139,7 @@ Propuestas propias, agrupadas por área. Ninguna depende de JIRA. El check indic
 9. **Notificaciones reales por correo** (vía Resend o el propio SMTP de Supabase, sin Slack ni JIRA) para: solicitud asignada a tu rol, fecha de compromiso a ≤48h, protocolo con gate incumplido en la etapa actual.
 10. **Cron diario de alertas** — hoy `/alertas` es "on-demand" (solo se calcula si alguien entra a mirar); un cron que corra la misma lógica una vez al día y dispare la notificación del punto 9 la vuelve proactiva.
 11. **Adjuntar múltiples archivos por paso** — hoy `evidencia_url` es un solo valor (link o archivo); un paso de checklist a veces necesita más de una evidencia.
-12. **Duplicar protocolo** — clonar uno existente como punto de partida en vez de escribir todos los pasos desde cero cada vez.
+12. ✅ **Duplicar protocolo** — botón "Duplicar" en el detalle del protocolo; crea uno nuevo ("Nombre (copia)", con contador si ya existe) con los mismos pasos/estados de la versión vigente como v1, y redirige directo a editarlo.
 13. **Plantillas de proyecto** — crear un proyecto que ya arranque con ciertos protocolos pre-iniciados según el tipo de proyecto (ej. todo proyecto WordPress arranca con "Seguridad WordPress" en curso).
 14. **Timeline de proyecto** — vista dedicada de cambios de etapa a lo largo del tiempo (hoy ese historial existe en `EventoAuditoria` pero no hay una vista que lo muestre agrupado por proyecto).
 15. **Archivar proyectos completados** — hoy un proyecto cerrado sigue apareciendo igual que uno activo en todas las listas y en el dashboard.

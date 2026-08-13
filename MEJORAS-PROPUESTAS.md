@@ -94,7 +94,7 @@ Se va tildando a medida que se implementa.
 
 **Tier 3 — medio (puede tocar schema o agregar una vista nueva)**
 - [x] #12 Duplicar protocolo
-- [ ] #7 Auditoría con filtro de fecha/usuario/entidad
+- [x] #7 Auditoría con filtro de fecha/usuario/entidad
 - [ ] #15 Archivar proyectos completados
 - [ ] #1 Paginación en listas largas
 - [ ] #21 Rate limiting básico en rutas de API
@@ -131,7 +131,7 @@ Propuestas propias, agrupadas por área. Ninguna depende de JIRA. El check indic
 3. **Pantalla de error propia** (`error.tsx` de Next.js) — hoy un error no controlado muestra el mensaje crudo de Next con el `digest`; una pantalla con "algo salió mal, reintentar" es más apropiada para usuarios no técnicos.
 4. ✅ **Modo oscuro con toggle manual** — botón en el sidebar (`ThemeToggle.tsx`) que cicla Automático → Claro → Oscuro, guardado en `localStorage` y aplicado via `data-theme` en `<html>` (con `suppressHydrationWarning` para el script anti-FOUC que lo fija antes del primer paint). De paso se corrigió `--color-surface-hover`, un token que varios botones ya referenciaban en Tailwind pero no existía, y el salto de contraste `bg-surface`→`bg-bg` en hover que era casi imperceptible en tema oscuro.
 6. ✅ **Onboarding para cuenta sin rol** — el dashboard ahora muestra el nombre/correo de los titulares de los roles admin (`esAdmin: true`) en vez de un párrafo genérico. Si ningún rol admin tiene titular asignado, cae al texto genérico "Líder técnico o Director/a".
-7. **Auditoría con filtro de fecha/usuario/entidad** — hoy `/auditoria` solo muestra los últimos 100 eventos sin poder acotar por rango o buscar por persona.
+7. ✅ **Auditoría con filtro de fecha/usuario/entidad** — filtro server-side (`?desde&hasta&usuarioId&entidad`, sin JS) sobre toda la tabla, no solo los últimos 100 ya cargados; sigue mostrando como máximo 100 resultados del filtro aplicado.
 8. **Revisión de accesibilidad con una herramienta tipo axe** — contraste de colores en tema oscuro y navegación 100% por teclado no se probaron formalmente.
 
 ### Funcionalidad

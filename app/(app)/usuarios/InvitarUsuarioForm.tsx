@@ -2,17 +2,26 @@
 
 import { useId, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { invitarUsuario } from "./actions";
+import { Copy } from "lucide-react";
+import { crearUsuario } from "./actions";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
+
+function generarPassword() {
+  const alfabeto = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+  const bytes = new Uint32Array(12);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => alfabeto[b % alfabeto.length]).join("");
+}
 
 export function InvitarUsuarioForm({ roles }: { roles: Array<{ id: string; nombre: string }> }) {
   const router = useRouter();
   const { showToast } = useToast();
   const idBase = useId();
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState(() => generarPassword());
   const [rolId, setRolId] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,15 +32,21 @@ export function InvitarUsuarioForm({ roles }: { roles: Array<{ id: string; nombr
     setError(null);
 
     try {
-      await invitarUsuario(email, rolId);
+      await crearUsuario(email, password, rolId);
+      showToast(`Cuenta creada. Contraseña: ${password}`);
       setEmail("");
-      showToast("Invitación enviada");
+      setPassword(generarPassword());
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "No se pudo invitar al usuario");
+      setError(err instanceof Error ? err.message : "No se pudo crear el usuario");
     } finally {
       setLoading(false);
     }
+  }
+
+  function copiarPassword() {
+    navigator.clipboard.writeText(password);
+    showToast("Contraseña copiada");
   }
 
   return (
@@ -51,6 +66,31 @@ export function InvitarUsuarioForm({ roles }: { roles: Array<{ id: string; nombr
       </div>
 
       <div className="space-y-1">
+        <label htmlFor={`${idBase}-password`} className="text-sm text-text-muted">
+          Contraseña temporal
+        </label>
+        <div className="flex items-center gap-1">
+          <Input
+            id={`${idBase}-password`}
+            type="text"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            minLength={8}
+            required
+            className="font-mono"
+          />
+          <button
+            type="button"
+            onClick={copiarPassword}
+            className="rounded-md p-2 text-text-muted hover:bg-surface-hover hover:text-text"
+            title="Copiar contraseña"
+          >
+            <Copy size={16} strokeWidth={2} />
+          </button>
+        </div>
+      </div>
+
+      <div className="space-y-1">
         <label htmlFor={`${idBase}-rol`} className="text-sm text-text-muted">
           Rol (opcional)
         </label>
@@ -65,10 +105,14 @@ export function InvitarUsuarioForm({ roles }: { roles: Array<{ id: string; nombr
       </div>
 
       <Button type="submit" variant="primary" disabled={loading}>
-        {loading ? "Enviando..." : "Invitar"}
+        {loading ? "Creando..." : "Crear usuario"}
       </Button>
 
       {error && <p className="w-full text-sm text-red-600">{error}</p>}
+      <p className="w-full text-xs text-text-muted">
+        La cuenta queda activa de inmediato. Comparte el correo y la contraseña con la persona por
+        un canal seguro.
+      </p>
     </form>
   );
 }

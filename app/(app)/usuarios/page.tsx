@@ -37,17 +37,17 @@ export default async function UsuariosPage() {
 
       <Card className="mt-6">
         <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-text-muted">
-          Invitar usuario
+          Crear usuario
         </h2>
         {invitacionesHabilitadas ? (
           <InvitarUsuarioForm roles={roles} />
         ) : (
           <p className="text-sm text-text-muted">
-            Invitar usuarios nuevos requiere configurar{" "}
+            Crear usuarios nuevos requiere configurar{" "}
             <code className="font-mono text-xs">SUPABASE_SERVICE_ROLE_KEY</code> en las variables
             de entorno (Project Settings → API en Supabase → service_role key). Mientras tanto,
-            los usuarios se crean invitándolos directo desde el dashboard de Supabase — aparecen
-            acá automáticamente para asignarles un rol.
+            los usuarios se crean directo desde el dashboard de Supabase — aparecen acá
+            automáticamente para asignarles un rol.
           </p>
         )}
       </Card>

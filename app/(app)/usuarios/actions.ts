@@ -20,13 +20,13 @@ async function requireAdmin() {
   return usuario;
 }
 
-export async function invitarUsuario(email: string, rolId: string) {
+export async function crearUsuario(email: string, password: string, rolId: string) {
   const usuarioActual = await requireAdmin();
 
   const adminClient = createAdminClient();
   if (!adminClient) {
     throw new Error(
-      "Invitar usuarios requiere SUPABASE_SERVICE_ROLE_KEY configurada en las variables de entorno",
+      "Crear usuarios requiere SUPABASE_SERVICE_ROLE_KEY configurada en las variables de entorno",
     );
   }
 
@@ -34,27 +34,34 @@ export async function invitarUsuario(email: string, rolId: string) {
   if (!correo) {
     throw new Error("El correo es requerido");
   }
+  if (password.length < 8) {
+    throw new Error("La contraseña debe tener al menos 8 caracteres");
+  }
 
-  const { data, error } = await adminClient.auth.admin.inviteUserByEmail(correo);
+  const { data, error } = await adminClient.auth.admin.createUser({
+    email: correo,
+    password,
+    email_confirm: true,
+  });
   if (error) {
     throw new Error(error.message);
   }
 
   // El trigger de Supabase (trigger_usuario_sync) crea la fila espejo en
-  // Usuario al invitar; si por algun motivo no corrio todavia, se crea aca
-  // para poder asignarle el rol de inmediato.
-  const invitedId = data.user.id;
+  // Usuario al crear la cuenta; si por algun motivo no corrio todavia, se
+  // crea aca para poder asignarle el rol de inmediato.
+  const nuevoId = data.user.id;
   await prisma.usuario.upsert({
-    where: { id: invitedId },
+    where: { id: nuevoId },
     update: rolId ? { rolId } : {},
-    create: { id: invitedId, email: correo, rolId: rolId || null },
+    create: { id: nuevoId, email: correo, rolId: rolId || null },
   });
 
   await registrarEvento({
     entidad: "Usuario",
-    entidadId: invitedId,
+    entidadId: nuevoId,
     usuarioId: usuarioActual.id,
-    accion: "invitado",
+    accion: "creado",
     detalle: { email: correo, rolId: rolId || null },
   });
 

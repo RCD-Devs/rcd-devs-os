@@ -7,18 +7,45 @@ import { registrarEvento } from "@/lib/auditoria";
 import { getCurrentUser } from "@/lib/auth/getCurrentUser";
 import { esAdmin } from "@/lib/auth/esAdmin";
 
-export async function crearCliente(nombre: string) {
+export async function crearCliente(data: {
+  nombre: string;
+  contactoNombre: string;
+  contactoEmail: string;
+  contactoTelefono: string;
+  rubro: string;
+  sitioWeb: string;
+  notas: string;
+}) {
   const usuario = await getCurrentUser();
 
   if (!usuario) {
     throw new Error("No autenticado");
   }
 
-  if (!nombre.trim()) {
+  const nombre = data.nombre.trim();
+  if (!nombre) {
     throw new Error("El nombre es requerido");
   }
 
-  const cliente = await prisma.cliente.create({ data: { nombre: nombre.trim() } });
+  let cliente;
+  try {
+    cliente = await prisma.cliente.create({
+      data: {
+        nombre,
+        contactoNombre: data.contactoNombre.trim() || null,
+        contactoEmail: data.contactoEmail.trim() || null,
+        contactoTelefono: data.contactoTelefono.trim() || null,
+        rubro: data.rubro.trim() || null,
+        sitioWeb: data.sitioWeb.trim() || null,
+        notas: data.notas.trim() || null,
+      },
+    });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      throw new Error("Ya existe un cliente con ese nombre");
+    }
+    throw error;
+  }
 
   await registrarEvento({
     entidad: "Cliente",
@@ -56,18 +83,25 @@ export async function actualizarCliente(
     throw new Error("El nombre es requerido");
   }
 
-  await prisma.cliente.update({
-    where: { id: clienteId },
-    data: {
-      nombre,
-      contactoNombre: data.contactoNombre.trim() || null,
-      contactoEmail: data.contactoEmail.trim() || null,
-      contactoTelefono: data.contactoTelefono.trim() || null,
-      rubro: data.rubro.trim() || null,
-      sitioWeb: data.sitioWeb.trim() || null,
-      notas: data.notas.trim() || null,
-    },
-  });
+  try {
+    await prisma.cliente.update({
+      where: { id: clienteId },
+      data: {
+        nombre,
+        contactoNombre: data.contactoNombre.trim() || null,
+        contactoEmail: data.contactoEmail.trim() || null,
+        contactoTelefono: data.contactoTelefono.trim() || null,
+        rubro: data.rubro.trim() || null,
+        sitioWeb: data.sitioWeb.trim() || null,
+        notas: data.notas.trim() || null,
+      },
+    });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      throw new Error("Ya existe un cliente con ese nombre");
+    }
+    throw error;
+  }
 
   await registrarEvento({
     entidad: "Cliente",

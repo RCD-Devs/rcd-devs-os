@@ -84,7 +84,7 @@ model RolPermiso {
 
 model Cliente {
   id               String  @id @default(uuid()) @db.Uuid
-  nombre           String
+  nombre           String  @unique
   contactoNombre   String? @map("contacto_nombre")
   contactoEmail    String? @map("contacto_email")
   contactoTelefono String? @map("contacto_telefono")

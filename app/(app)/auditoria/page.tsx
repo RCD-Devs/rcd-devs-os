@@ -1,5 +1,8 @@
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { Card } from "@/components/ui/Card";
+import { getCurrentUser } from "@/lib/auth/getCurrentUser";
+import { esAdmin } from "@/lib/auth/esAdmin";
 
 // Ruta protegida por proxy.ts, depende de datos reales de Supabase: nunca
 // prerenderizar estaticamente (mismo criterio que /protocolos).
@@ -8,6 +11,16 @@ export const dynamic = "force-dynamic";
 const LIMITE = 100;
 
 export default async function AuditoriaPage() {
+  const usuarioActual = await getCurrentUser();
+
+  if (!usuarioActual) {
+    redirect("/login");
+  }
+  // Mismo criterio que /usuarios y /roles: solo Lider tecnico y Director/a.
+  if (!esAdmin(usuarioActual)) {
+    redirect("/dashboard");
+  }
+
   const eventos = await prisma.eventoAuditoria.findMany({
     include: { usuario: true },
     orderBy: { createdAt: "desc" },

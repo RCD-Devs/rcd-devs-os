@@ -15,6 +15,7 @@ Documento vivo: nació como lista de propuestas y ahora refleja lo que ya se imp
 - Estados vacíos consistentes (ícono + texto) en las listas
 - `aria-label`/`aria-expanded` en los botones de solo-ícono
 - Filtro de dashboard por cliente
+- **Modo oscuro con toggle manual** (`ThemeToggle.tsx` en el sidebar) — Automático/Claro/Oscuro independiente de la preferencia del SO, sin flash al cargar
 
 **Funcionalidad**
 - **Semáforo verde/amarillo/rojo** (`lib/proyectos/semaforo.ts`) — reglas propias, **sin JIRA**: se calcula a partir de `fechaCompromiso` del proyecto y `fechaLimite` de cada ejecución de protocolo activa.
@@ -86,7 +87,7 @@ Se va tildando a medida que se implementa.
 **Tier 2 — simple (una feature acotada, sin cambio de schema)**
 - [x] #24 Validación de tamaño/tipo de archivo en el upload de evidencia
 - [x] #18 Más tests unitarios en funciones puras (`slug.ts`, `actionResult.ts`) — el doc decía "ni un solo `.test.ts` en el repo", ya no era exacto (`lib/protocolos/estados.test.ts` existía). Sigue faltando cobertura de `lib/proyectos/semaforo.ts` y de la capa de Server Actions.
-- [ ] #4 Modo oscuro con toggle manual
+- [x] #4 Modo oscuro con toggle manual
 - [x] #6 Onboarding para cuenta sin rol (mostrar titulares de Líder técnico/Director·a)
 - [x] #33 Exportar auditoría a CSV
 - [x] #28 Cachear catálogos casi estáticos (Etapas, Roles)
@@ -128,7 +129,7 @@ Propuestas propias, agrupadas por área. Ninguna depende de JIRA. El check indic
 1. **Paginación en las listas** — hoy `/proyectos`, `/protocolos`, `/clientes`, `/auditoria` traen todos los registros sin límite; funciona con los volúmenes actuales pero no escala.
 2. **Buscador global (Cmd/Ctrl+K)** — un solo cuadro que busque a la vez en proyectos, protocolos, clientes y solicitudes, en vez de tres buscadores independientes por vista.
 3. **Pantalla de error propia** (`error.tsx` de Next.js) — hoy un error no controlado muestra el mensaje crudo de Next con el `digest`; una pantalla con "algo salió mal, reintentar" es más apropiada para usuarios no técnicos.
-4. **Modo oscuro con toggle manual** — hoy solo sigue la preferencia del sistema operativo; útil si alguien quiere forzarlo independiente del SO.
+4. ✅ **Modo oscuro con toggle manual** — botón en el sidebar (`ThemeToggle.tsx`) que cicla Automático → Claro → Oscuro, guardado en `localStorage` y aplicado via `data-theme` en `<html>` (con `suppressHydrationWarning` para el script anti-FOUC que lo fija antes del primer paint). De paso se corrigió `--color-surface-hover`, un token que varios botones ya referenciaban en Tailwind pero no existía, y el salto de contraste `bg-surface`→`bg-bg` en hover que era casi imperceptible en tema oscuro.
 6. ✅ **Onboarding para cuenta sin rol** — el dashboard ahora muestra el nombre/correo de los titulares de los roles admin (`esAdmin: true`) en vez de un párrafo genérico. Si ningún rol admin tiene titular asignado, cae al texto genérico "Líder técnico o Director/a".
 7. **Auditoría con filtro de fecha/usuario/entidad** — hoy `/auditoria` solo muestra los últimos 100 eventos sin poder acotar por rango o buscar por persona.
 8. **Revisión de accesibilidad con una herramienta tipo axe** — contraste de colores en tema oscuro y navegación 100% por teclado no se probaron formalmente.

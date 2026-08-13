@@ -18,6 +18,7 @@ import {
   X,
 } from "lucide-react";
 import { LogoutButton } from "@/components/LogoutButton";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const NAV_LINKS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, adminOnly: false },
@@ -128,6 +129,7 @@ export function Sidebar({
             <User size={17} strokeWidth={2} />
             <span className="truncate">{nombre ?? "Perfil"}</span>
           </Link>
+          <ThemeToggle className="w-full" />
           <LogoutButton className="mt-1 w-full justify-start gap-2.5 border-none px-3 shadow-none" />
         </div>
       </aside>

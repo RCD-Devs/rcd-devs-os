@@ -64,8 +64,13 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* Modo oscuro: por defecto sigue la preferencia del SO. Un toggle manual
+   (ThemeToggle.tsx) puede forzarlo escribiendo data-theme="dark"|"light" en
+   <html>; ":not([data-theme='light'])" deja que ese override gane incluso
+   con el SO en oscuro, y el bloque [data-theme="dark"] de abajo cubre el
+   caso inverso (SO en claro, usuario fuerza oscuro). */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --color-bg: #0a0a0a;
     --color-surface: #141414;
     --color-surface-hover: #262626;
@@ -94,6 +99,36 @@
     --color-chart-4-bg: #92400e26;
     --color-chart-5-bg: #9f123526;
   }
+}
+
+:root[data-theme="dark"] {
+  --color-bg: #0a0a0a;
+  --color-surface: #141414;
+  --color-surface-hover: #262626;
+  --color-border: #2a2a2a;
+  --color-text: #ededed;
+  --color-text-muted: #a1a1a1;
+
+  --color-accent: #3b82f6;
+  --color-accent-foreground: #0a0a0a;
+
+  --color-success: #4ade80;
+  --color-success-bg: #052e16;
+  --color-warning: #fbbf24;
+  --color-warning-bg: #451a03;
+  --color-neutral-badge: #a1a1a1;
+  --color-neutral-badge-bg: #1f1f1f;
+
+  --color-chart-1: #60a5fa;
+  --color-chart-2: #a78bfa;
+  --color-chart-3: #2dd4bf;
+  --color-chart-4: #fbbf24;
+  --color-chart-5: #fb7185;
+  --color-chart-1-bg: #1e3a8a26;
+  --color-chart-2-bg: #5b21b626;
+  --color-chart-3-bg: #0f766e26;
+  --color-chart-4-bg: #92400e26;
+  --color-chart-5-bg: #9f123526;
 }
 
 body {

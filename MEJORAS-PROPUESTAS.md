@@ -35,9 +35,15 @@ Documento vivo: nació como lista de propuestas y ahora refleja lo que ya se imp
 - Contenido borrador para **Seguridad WordPress** (~24 ítems), **Creación de ambientes** y **Cookies y protección de datos** — borradores de industria, no el contenido real del xlsx interno del roadmap.
 - Descripciones para los 14 ítems de "Elementos básicos de sitio web".
 
+- **Gestión completa de usuarios desde `/usuarios`** — crear cuenta directo con email + contraseña temporal (`auth.admin.createUser`, sin depender de que Supabase logre entregar un email de invitación), editar correo, restablecer contraseña y eliminar cuenta, todo admin-only y sin salir de la app.
+- **`/auditoria` restringida a admin** — antes cualquier usuario autenticado podía verla; ahora sigue el mismo criterio que `/usuarios` y `/roles`.
+- **Cliente con nombre único** — constraint `UNIQUE` en `Cliente.nombre` a nivel de base de datos (antes se podían crear duplicados exactos sin aviso); mensaje de error claro al intentarlo.
+- **Confirmación antes de acciones destructivas** (`ConfirmDeleteButton`) — eliminar cliente, proyecto o usuario pide un segundo click explícito en vez de un modal nativo `confirm()` o un botón directo.
+
 **Infraestructura / deploy**
 - **Migración a Prisma Driver Adapters** (`@prisma/adapter-pg` + `engineType: "client"`) — el deploy en Vercel fallaba en producción (`PrismaClientInitializationError`, motor nativo no encontrado) pese a tres intentos de configurar correctamente el empaquetado del binario. La solución fue eliminar la dependencia del binario nativo: Prisma ahora usa el driver `pg` en JS puro.
 - **Región de las funciones de Vercel alineada con Supabase** — las funciones corrían en `iad1` (EE.UU., costa este) mientras la base está en `sa-east-1` (São Paulo); cada query cruzaba el continente. Cambiado a `gru1` (São Paulo). Esto explica gran parte del delay de navegación reportado — revisar si con Fluid Compute + región correcta se siente suficientemente rápido antes de invertir en más optimización (ver pendientes).
+- **Mensajes de error de Server Actions reparados en producción** — Next.js 16 no propaga el `throw new Error(...)` de una Server Action al cliente en producción (solo llega un digest genérico, "Minified React error #441"); rompía en silencio *todos* los mensajes de validación/permiso/duplicado de la app, y solo se notaba en `next dev`. Las 9 Server Actions del proyecto ahora devuelven `{ ok, data } / { ok: false, error }` (`lib/actionResult.ts`) en vez de lanzar.
 
 **Corrección a este documento**: la versión anterior decía que no había RLS en Supabase. Eso era un error — RLS ya estaba habilitado desde antes (`EjecucionProtocolo`, `EjecucionPaso`) con policies de "cualquier autenticado lee/escribe". Las tablas nuevas siguen ese mismo criterio; `EventoAuditoria` además no tiene policy de `UPDATE`/`DELETE`, para que el append-only se cumpla a nivel de base de datos.
 
@@ -51,8 +57,7 @@ Documento vivo: nació como lista de propuestas y ahora refleja lo que ya se imp
 - Creación automática de issues en JIRA desde un protocolo/checklist
 
 **Depende de credenciales externas que no están en `.env`**
-- Invitar usuarios desde `/usuarios` — el botón queda deshabilitado hasta agregar `SUPABASE_SERVICE_ROLE_KEY` (Project Settings → API en Supabase). Mientras tanto, invitar desde el dashboard de Supabase funciona igual: el usuario aparece automáticamente en `/usuarios` para asignarle rol.
-- Notificaciones reales por Slack/correo (el centro de alertas in-app es el sustituto mientras tanto)
+- Notificaciones reales por correo (el centro de alertas in-app es el sustituto mientras tanto) — necesita elegir un proveedor (Resend, SMTP de Supabase, etc.)
 
 **Vale la pena revisar con el equipo**
 - El contenido borrador de Seguridad WordPress / Creación de ambientes / Cookies
@@ -62,9 +67,61 @@ Documento vivo: nació como lista de propuestas y ahora refleja lo que ya se imp
 
 ---
 
-## Recomendaciones (35)
+## Priorización por complejidad
 
-Propuestas propias, no implementadas todavía, agrupadas por área. Ninguna depende de JIRA.
+Orden de ejecución (más simple primero): sin cambio de schema, sin dependencias nuevas y de pocos
+archivos primero; lo que toca base de datos, agrega infraestructura externa o es más una decisión
+de negocio que de código queda al final. Los números remiten a la lista de Recomendaciones de abajo.
+Se va tildando a medida que se implementa.
+
+**Tier 1 — trivial (config/doc, sin schema, sin deps nuevas)**
+- [x] #3 Pantalla de error propia (`error.tsx`)
+- [x] #25 Headers de seguridad HTTP básicos
+- [x] #26 Documentar `SUPABASE_SERVICE_ROLE_KEY` (rotación, quién la generó)
+- [x] #31 Revisar tamaño del connection pool de `pg`
+- [x] #19 CI en GitHub Actions (typecheck + lint + build)
+- [x] #20 README actualizado (estaba desincronizado: decía "Fase 0, sin código" y sin mencionar que JIRA quedó fuera de alcance)
+- [x] #30 Habilitar Speed Insights / Web Analytics de Vercel
+
+**Tier 2 — simple (una feature acotada, sin cambio de schema)**
+- [x] #24 Validación de tamaño/tipo de archivo en el upload de evidencia
+- [x] #18 Más tests unitarios en funciones puras (`slug.ts`, `actionResult.ts`, semáforo) — el doc decía "0% cobertura", ya no es exacto
+- [ ] #4 Modo oscuro con toggle manual
+- [ ] #6 Onboarding para cuenta sin rol (mostrar titulares de Líder técnico/Director·a)
+- [ ] #33 Exportar auditoría a CSV
+- [ ] #28 Cachear catálogos casi estáticos (Etapas, Roles)
+
+**Tier 3 — medio (puede tocar schema o agregar una vista nueva)**
+- [ ] #12 Duplicar protocolo
+- [ ] #7 Auditoría con filtro de fecha/usuario/entidad
+- [ ] #15 Archivar proyectos completados
+- [ ] #1 Paginación en listas largas
+- [ ] #21 Rate limiting básico en rutas de API
+- [ ] #29 Suspense granular en `/alertas`
+- [ ] #35 Exportar el dashboard completo a PDF
+- [ ] #32 Dashboard de cumplimiento por cliente
+- [ ] #16 Comentarios en Solicitudes (modelo nuevo)
+- [ ] #11 Adjuntar múltiples archivos por paso (modelo nuevo)
+- [ ] #14 Timeline de proyecto
+- [ ] #17 Picker de usuario con búsqueda
+
+**Tier 4 — grande / depende de una decisión externa**
+- [ ] #23 RLS diferenciado por rol (sensible: cambia policies en producción)
+- [ ] #9 Notificaciones reales por correo (requiere elegir proveedor)
+- [ ] #10 Cron diario de alertas (depende de #9 para tener a quién notificar)
+- [ ] #13 Plantillas de proyecto
+- [ ] #34 Métricas de tiempo por protocolo
+- [ ] #2 Buscador global (Cmd/Ctrl+K)
+- [ ] #22 Storybook / catálogo de componentes
+- [ ] #27 Política de retención de Storage/auditoría (decisión de negocio, no solo código)
+- [ ] #8 Revisión de accesibilidad (auditoría, no build)
+
+---
+
+## Recomendaciones (34)
+
+Propuestas propias, agrupadas por área. Ninguna depende de JIRA. El check indica que ya se implementó
+(ver también "Priorización por complejidad" arriba y "Implementado" al inicio del documento).
 
 ### UX/UI
 
@@ -72,7 +129,6 @@ Propuestas propias, no implementadas todavía, agrupadas por área. Ninguna depe
 2. **Buscador global (Cmd/Ctrl+K)** — un solo cuadro que busque a la vez en proyectos, protocolos, clientes y solicitudes, en vez de tres buscadores independientes por vista.
 3. **Pantalla de error propia** (`error.tsx` de Next.js) — hoy un error no controlado muestra el mensaje crudo de Next con el `digest`; una pantalla con "algo salió mal, reintentar" es más apropiada para usuarios no técnicos.
 4. **Modo oscuro con toggle manual** — hoy solo sigue la preferencia del sistema operativo; útil si alguien quiere forzarlo independiente del SO.
-5. **Confirmación antes de acciones destructivas** — todavía no hay ningún "eliminar" en la UI, pero cuando se agregue (proyecto, protocolo, usuario) va a necesitar un modal de confirmación, no un click directo.
 6. **Onboarding para cuenta sin rol** — hoy el mensaje es un párrafo de texto ("cuenta pendiente de configuración"); podría mostrar directo a quién contactar (los titulares de "Líder técnico"/"Director/a" ya están en la tabla `Rol`).
 7. **Auditoría con filtro de fecha/usuario/entidad** — hoy `/auditoria` solo muestra los últimos 100 eventos sin poder acotar por rango o buscar por persona.
 8. **Revisión de accesibilidad con una herramienta tipo axe** — contraste de colores en tema oscuro y navegación 100% por teclado no se probaron formalmente.
